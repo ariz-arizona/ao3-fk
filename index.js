@@ -43,24 +43,29 @@ bot.onText(/\/cit/, async (msg) => {
         const worksCount = dom.window.document.querySelectorAll('.work > li').length - 1;
         const randomWork = getRandomInt(0, worksCount);
         randomWorkUrl = dom.window.document.querySelectorAll('.work > li')[randomWork].querySelector('.heading > a').href;
-
-        bot.sendMessage(chatId, `Адрес случайной работы: ${randomWorkUrl}`);
     });
 
     await JSDOM.fromURL(`${randomWorkUrl}${makeQueryString({ 'view_full_work': 'true', 'view_adult': 'true' })}`).then(dom => {
+        const fandom = dom.window.document.querySelector('dd.fandom.tags').textContent.trim();
+        const title = dom.window.document.querySelector('.title.heading').textContent.trim();
+        const downloadLink = dom.window.document.querySelector('.download > ul > li:nth-child(2) > a').href;
+        const summary = dom.window.document.querySelector('.summary .userstuff').textContent.trim();
+
+        bot.sendMessage(chatId, `<b>Случайная работа</b>\n\n${title}\n\n${fandom}\n\n${downloadLink}\n\n${summary}`, { parse_mode: 'HTML' });
+
         const paragraphs = dom.window.document.querySelectorAll('#chapters .userstuff > p');
 
         let randomParagraph, randomParagraphText;
         let i = 0;
         const paragraphsCount = paragraphs.length - 1;
-        
+
         do {
             randomParagraph = getRandomInt(0, paragraphsCount);
-            randomParagraphText = paragraphs[randomParagraph].textContent;
+            randomParagraphText = paragraphs[randomParagraph].textContent.substring(0, 2048);
             i++;
         } while (randomParagraphText == '' || i > 10)
 
-        bot.sendMessage(chatId, `Случайный параграф: ${randomParagraphText}`);
+        bot.sendMessage(chatId, `<b>Случайный параграф</b>\n${randomParagraphText}`, { parse_mode: 'HTML' });
     })
 });
 
