@@ -19,12 +19,18 @@ const worksUrl = `${ao3Url}/tags/${fkTag2021}/works`;
 
 bot.onText(/\/cit/, async (msg) => {
     const chatId = msg.chat.id;
+    console.log(`Сделан запрос от чат айди ${chatId}`);
 
     const queryAttrs = {
         'work_search%5Bwords_from%5D': 100
     };
 
     let pageQuery = {};
+
+    let techMsgId;
+    bot.sendMessage(chatId, 'Открыл все работы').then(msg => {
+        techMsgId = msg.message_id;
+    });
 
     await JSDOM.fromURL(`${worksUrl}${makeQueryString(queryAttrs)}`).then(dom => {
         const lastPageUrl = dom.window.document.querySelector('.pagination li:nth-last-child(2) a').href;
@@ -34,6 +40,8 @@ bot.onText(/\/cit/, async (msg) => {
 
         pageQuery = searchParams;
         pageQuery.page = randomPage;
+
+        bot.editMessageText('Выбрал случайную страницу', { chat_id: chatId, message_id: techMsgId });
     });
 
     let randomWorkUrl;
@@ -43,6 +51,8 @@ bot.onText(/\/cit/, async (msg) => {
         const worksCount = dom.window.document.querySelectorAll('.work > li').length - 1;
         const randomWork = getRandomInt(0, worksCount);
         randomWorkUrl = dom.window.document.querySelectorAll('.work > li')[randomWork].querySelector('.heading > a').href;
+
+        bot.editMessageText('Выбрал случайную работу', { chat_id: chatId, message_id: techMsgId });
     });
 
     await JSDOM.fromURL(`${randomWorkUrl}${makeQueryString({ 'view_full_work': 'true', 'view_adult': 'true' })}`).then(dom => {
@@ -53,6 +63,8 @@ bot.onText(/\/cit/, async (msg) => {
 
         const paragraphs = dom.window.document.querySelectorAll('#chapters .userstuff > p');
 
+        bot.editMessageText('Ищу случайный абзац', { chat_id: chatId, message_id: techMsgId });
+
         let randomParagraph, randomParagraphText;
         let i = 0;
         const paragraphsCount = paragraphs.length - 1;
@@ -60,8 +72,12 @@ bot.onText(/\/cit/, async (msg) => {
         do {
             randomParagraph = getRandomInt(0, paragraphsCount);
             randomParagraphText = paragraphs[randomParagraph].textContent.trim().substring(0, 2048);
+            bot.editMessageText(`Ищу случайный абзац ${i + 1} раз`, { chat_id: chatId, message_id: techMsgId });
             i++;
         } while (randomParagraphText === '' || i > 5)
+
+        bot.editMessageText('Все нашел!', { chat_id: chatId, message_id: techMsgId });
+        console.log(`Для чат айди ${chatId} найдена работа ${randomWorkUrl}`);
 
         bot.sendMessage(
             chatId,
@@ -76,6 +92,7 @@ bot.onText(/\/cit/, async (msg) => {
                 );
             }
         );
+
     })
 });
 
