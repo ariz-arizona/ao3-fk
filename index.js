@@ -1,11 +1,11 @@
+require('dotenv').config()
 const TelegramBot = require('node-telegram-bot-api');
 const jsdom = require("jsdom");
 
 const { getRandomInt, makeQueryString, getSearchParametres } = require('./helpers');
-
-const BOT_TOKEN = '5070356601:AAE7bzA2JitsGbf2oKH9SHVEpDlQrTz-4gE';
-
+const { BOT_TOKEN } = process.env;
 const { JSDOM } = jsdom;
+
 const bot = new TelegramBot(BOT_TOKEN, { polling: true });
 
 const fkTag = 'Fandom%20Kombat';
