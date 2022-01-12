@@ -65,7 +65,7 @@ bot.onText(/\/cit/, async (msg) => {
 
         bot.sendMessage(
             chatId,
-            `<b>Случайная работа</b>\n\n${title}\n\n${fandom}\n\n${downloadLink}\n\n${summary}`,
+            `<b>Случайная работа</b>\n\n<b>Название</b>: ${title}\n\n<b>Фандом</b>: ${fandom}\n\n<b>Ссылка на EPUB</b>: ${downloadLink}\n\n<b>Саммари</b>: ${summary}\n\n<b>Ссылка на документ</b>: ${randomWorkUrl}`,
             { parse_mode: 'HTML' }
         ).then(
             () => {
