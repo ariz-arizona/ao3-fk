@@ -49,9 +49,7 @@ bot.onText(/\/cit/, async (msg) => {
         const fandom = dom.window.document.querySelector('dd.fandom.tags').textContent.trim();
         const title = dom.window.document.querySelector('.title.heading').textContent.trim();
         const downloadLink = dom.window.document.querySelector('.download > ul > li:nth-child(2) > a').href;
-        const summary = dom.window.document.querySelector('.summary .userstuff').textContent.trim();
-
-        bot.sendMessage(chatId, `<b>Случайная работа</b>\n\n${title}\n\n${fandom}\n\n${downloadLink}\n\n${summary}`, { parse_mode: 'HTML' });
+        const summary = dom.window.document.querySelector('.summary .userstuff') ? dom.window.document.querySelector('.summary .userstuff').textContent.trim() : '';
 
         const paragraphs = dom.window.document.querySelectorAll('#chapters .userstuff > p');
 
@@ -61,11 +59,23 @@ bot.onText(/\/cit/, async (msg) => {
 
         do {
             randomParagraph = getRandomInt(0, paragraphsCount);
-            randomParagraphText = paragraphs[randomParagraph].textContent.substring(0, 2048);
+            randomParagraphText = paragraphs[randomParagraph].textContent.trim().substring(0, 2048);
             i++;
-        } while (randomParagraphText == '' || i > 10)
+        } while (randomParagraphText === '' || i > 5)
 
-        bot.sendMessage(chatId, `<b>Случайный параграф</b>\n${randomParagraphText}`, { parse_mode: 'HTML' });
+        bot.sendMessage(
+            chatId,
+            `<b>Случайная работа</b>\n\n${title}\n\n${fandom}\n\n${downloadLink}\n\n${summary}`,
+            { parse_mode: 'HTML' }
+        ).then(
+            () => {
+                return bot.sendMessage(
+                    chatId,
+                    `<b>Случайный параграф</b>\n${randomParagraphText}`,
+                    { parse_mode: 'HTML' }
+                );
+            }
+        );
     })
 });
 
