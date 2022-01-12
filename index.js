@@ -35,6 +35,7 @@ bot.onText(/\/cit/, async (msg) => {
 
         await JSDOM.fromURL(`${worksUrl}${makeQueryString(queryAttrs)}`).then(dom => {
             const lastPageUrl = dom.window.document.querySelector('.pagination li:nth-last-child(2) a').href;
+            dom.window.close();
 
             const searchParams = getSearchParametres(lastPageUrl);
             const randomPage = getRandomInt(1, searchParams.page);
@@ -52,8 +53,10 @@ bot.onText(/\/cit/, async (msg) => {
             const worksCount = dom.window.document.querySelectorAll('.work > li').length - 1;
             const randomWork = getRandomInt(0, worksCount);
             randomWorkUrl = dom.window.document.querySelectorAll('.work > li')[randomWork].querySelector('.heading > a').href;
+            dom.window.close();
 
             bot.editMessageText('Выбрал случайную работу', { chat_id: chatId, message_id: techMsgId });
+            console.log(`Для чат айди ${chatId} выбрана работа ${randomWorkUrl}`);
         });
 
         await JSDOM.fromURL(`${randomWorkUrl}${makeQueryString({ 'view_full_work': 'true', 'view_adult': 'true' })}`).then(dom => {
@@ -61,8 +64,8 @@ bot.onText(/\/cit/, async (msg) => {
             const title = dom.window.document.querySelector('.title.heading').textContent.trim();
             const downloadLink = dom.window.document.querySelector('.download > ul > li:nth-child(2) > a').href;
             const summary = dom.window.document.querySelector('.summary .userstuff') ? dom.window.document.querySelector('.summary .userstuff').textContent.trim() : '';
-
             const paragraphs = dom.window.document.querySelectorAll('#chapters .userstuff > p');
+            dom.window.close();
 
             bot.editMessageText('Ищу случайный абзац', { chat_id: chatId, message_id: techMsgId });
 
@@ -78,7 +81,7 @@ bot.onText(/\/cit/, async (msg) => {
             } while (randomParagraphText === '' || i > 5)
 
             bot.editMessageText('Все нашел!', { chat_id: chatId, message_id: techMsgId });
-            console.log(`Для чат айди ${chatId} найдена работа ${randomWorkUrl}`);
+            console.log(`Для чат айди ${chatId} загружена работа ${randomWorkUrl}`);
 
             bot.sendMessage(
                 chatId,
