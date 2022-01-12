@@ -14,7 +14,6 @@ const ao3Url = 'https://archiveofourown.org';
 
 const worksUrl = `${ao3Url}/tags/${fkTag2021}/works`;
 
-//todo ~убрать лапшу~
 //todo продолжать работу при ошибке парсинга
 //todo ссылка на скачивание вместо урл страницы ??
 
@@ -26,17 +25,17 @@ bot.onText(/\/cit/, async (msg) => {
     };
 
     let pageQuery = {};
-    
+
     await JSDOM.fromURL(`${worksUrl}${makeQueryString(queryAttrs)}`).then(dom => {
         const lastPageUrl = dom.window.document.querySelector('.pagination li:nth-last-child(2) a').href;
-        
+
         const searchParams = getSearchParametres(lastPageUrl);
         const randomPage = getRandomInt(1, searchParams.page);
-        
+
         pageQuery = searchParams;
         pageQuery.page = randomPage;
     });
-    
+
     let randomWorkUrl;
     const randomPageUrl = `${worksUrl}${makeQueryString(pageQuery)}`;
 
@@ -50,9 +49,16 @@ bot.onText(/\/cit/, async (msg) => {
 
     await JSDOM.fromURL(`${randomWorkUrl}${makeQueryString({ 'view_full_work': 'true', 'view_adult': 'true' })}`).then(dom => {
         const paragraphs = dom.window.document.querySelectorAll('#chapters .userstuff > p');
+
+        let randomParagraph, randomParagraphText;
+        let i = 0;
         const paragraphsCount = paragraphs.length - 1;
-        const randomParagraph = getRandomInt(0, paragraphsCount);
-        const randomParagraphText = paragraphs[randomParagraph].textContent;
+        
+        do {
+            randomParagraph = getRandomInt(0, paragraphsCount);
+            randomParagraphText = paragraphs[randomParagraph].textContent;
+            i++;
+        } while (randomParagraphText == '' || i > 10)
 
         bot.sendMessage(chatId, `Случайный параграф: ${randomParagraphText}`);
     })
