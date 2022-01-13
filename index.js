@@ -2,7 +2,7 @@ require('dotenv').config()
 const TelegramBot = require('node-telegram-bot-api');
 const jsdom = require("jsdom");
 
-const { getRandomInt, makeQueryString, getSearchParametres } = require('./helpers');
+const { getRandomInt, makeQueryString, getSearchParametres, closeWindow } = require('./helpers');
 const { BOT_TOKEN } = process.env;
 const { JSDOM } = jsdom;
 
@@ -35,7 +35,8 @@ bot.onText(/\/cit/, async (msg) => {
 
         await JSDOM.fromURL(`${worksUrl}${makeQueryString(queryAttrs)}`).then(dom => {
             const lastPageUrl = dom.window.document.querySelector('.pagination li:nth-last-child(2) a').href;
-            dom.window.close();
+
+            closeWindow(dom);
 
             const searchParams = getSearchParametres(lastPageUrl);
             const randomPage = getRandomInt(1, searchParams.page);
@@ -53,7 +54,7 @@ bot.onText(/\/cit/, async (msg) => {
             const worksCount = dom.window.document.querySelectorAll('.work > li').length - 1;
             const randomWork = getRandomInt(0, worksCount);
             randomWorkUrl = dom.window.document.querySelectorAll('.work > li')[randomWork].querySelector('.heading > a').href;
-            dom.window.close();
+            closeWindow(dom);
 
             bot.editMessageText('Выбрал случайную работу', { chat_id: chatId, message_id: techMsgId });
             console.log(`Для чат айди ${chatId} выбрана работа ${randomWorkUrl}`);
@@ -65,7 +66,7 @@ bot.onText(/\/cit/, async (msg) => {
             const downloadLink = dom.window.document.querySelector('.download > ul > li:nth-child(2) > a').href;
             const summary = dom.window.document.querySelector('.summary .userstuff') ? dom.window.document.querySelector('.summary .userstuff').textContent.trim() : '';
             const paragraphs = dom.window.document.querySelectorAll('#chapters .userstuff > p');
-            dom.window.close();
+            closeWindow(dom);
 
             bot.editMessageText('Ищу случайный абзац', { chat_id: chatId, message_id: techMsgId });
 

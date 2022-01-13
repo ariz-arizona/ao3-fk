@@ -21,4 +21,11 @@ const getSearchParametres = (url) => {
     return res;
 }
 
-module.exports = { getRandomInt, makeQueryString, getSearchParametres }
+const closeWindow = (dom) => {
+    dom.window.close()
+    if (typeof global.gc === 'function') {
+        global.gc()
+    }
+}
+
+module.exports = { getRandomInt, makeQueryString, getSearchParametres, closeWindow }
