@@ -23,13 +23,6 @@ const getSearchParametres = (url) => {
     return res;
 }
 
-const closeWindow = (dom) => {
-    dom.window.close()
-    if (typeof global.gc === 'function') {
-        global.gc()
-    }
-}
-
 const loadPage = async (url) => {
     // console.log(url)
     if (!url) {
@@ -48,4 +41,4 @@ const loadPage = async (url) => {
     }
 };
 
-module.exports = { getRandomInt, makeQueryString, getSearchParametres, closeWindow, loadPage }
+module.exports = { getRandomInt, makeQueryString, getSearchParametres, loadPage }

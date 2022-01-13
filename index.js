@@ -64,7 +64,7 @@ bot.onText(/\/cit/, async (msg) => {
 
         const fandom = dom.querySelector('dd.fandom.tags').textContent.trim();
         const title = dom.querySelector('.title.heading').textContent.trim();
-        const downloadLink = dom.querySelector('.download > ul > li:nth-child(2) > a').href;
+        const downloadLink = dom.querySelector('.download > ul > li:nth-child(2) > a').getAttribute('href');
         const summary = dom.querySelector('.summary .userstuff') ? dom.querySelector('.summary .userstuff').textContent.trim() : '';
         const paragraphs = dom.querySelectorAll('#chapters .userstuff > p');
 
@@ -101,6 +101,7 @@ bot.onText(/\/cit/, async (msg) => {
         if (process.memoryUsage().heapUsed > 200000000) {
             global.gc();
         }
+
     } catch (error) {
         bot.sendMessage(chatId, 'Ой! Что-то случилось! Может, попробуете еще раз?');
         console.log(`Ошибка в чате ${chatId}\n${error}`);
