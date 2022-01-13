@@ -97,6 +97,10 @@ bot.onText(/\/cit/, async (msg) => {
                 }
             );
         });
+
+        if (process.memoryUsage().heapUsed > 200000000) {
+            global.gc();
+        }
     } catch (error) {
         bot.sendMessage(chatId, 'Ой! Что-то случилось! Может, попробуете еще раз?');
         console.log(`Ошибка в чате ${chatId}\n${error}`);
