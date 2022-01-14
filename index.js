@@ -57,7 +57,7 @@ const getWorkData = async (dom) => {
     const downloadLink = dom.querySelector('.download > ul > li:nth-child(2) > a').getAttribute('href');
     const summary = dom.querySelector('.summary .userstuff') ? dom.querySelector('.summary .userstuff').textContent.trim() : '';
 
-    return {fandom, title, downloadLink, summary}
+    return { fandom, title, downloadLink, summary }
 }
 
 bot.onText(/\/cit/, async (msg) => {
@@ -73,7 +73,7 @@ bot.onText(/\/cit/, async (msg) => {
         const techMsgId = techMsg.message_id;
 
         const { dom, randomWorkUrl } = await searchWorkPage(chatId, techMsgId, queryAttrs);
-        const {fandom, title, downloadLink, summary} = await getWorkData(dom);
+        const { fandom, title, downloadLink, summary } = await getWorkData(dom);
 
         const paragraphs = dom.querySelectorAll('#chapters .userstuff p');
 
@@ -131,7 +131,46 @@ bot.onText(/\/pic/, async (msg) => {
     console.log(`Сделан запрос pic от чат айди ${chatId}`);
 
     try {
+        const queryAttrs = {
+            'work_search%5Bwords_to%5D': 100
+        };
 
+        const techMsg = await bot.sendMessage(chatId, 'Открываю все работы')
+        const techMsgId = techMsg.message_id;
+
+        const { dom, randomWorkUrl } = await searchWorkPage(chatId, techMsgId, queryAttrs);
+        const { fandom, title, downloadLink, summary } = await getWorkData(dom);
+
+        let image = [], iframe;
+        if (dom.querySelectorAll('#chapters .userstuff img').length > 0) {
+            image = dom.querySelectorAll('#chapters .userstuff img')[0].getAttribute('src');
+        }
+        if (dom.querySelector('#chapters .userstuff iframe')) {
+            iframe = dom.querySelector('#chapters .userstuff iframe').getAttribute('src');
+        }
+
+        const text = ['<b>Случайная работа</b>', `<b>Название</b>: ${title}`, `<b>Фандом</b>: ${fandom}`];
+        text.push(`<b><a href="${ao3Url}${downloadLink}">EPUB</></b>`);
+        summary ? text.push(`<b>Саммари</b>: ${summary}`) : null;
+        text.push(`<b><a href="${ao3Url}${randomWorkUrl}">Документ</a></b>`);
+
+        bot.editMessageText('Все нашел!', { chat_id: chatId, message_id: techMsgId });
+        console.log(`Для чат айди ${chatId} загружена работа ${randomWorkUrl}`);
+
+        bot.sendMessage(
+            chatId,
+            text.join('\n\n'),
+            { parse_mode: 'HTML' }
+        ).then(
+            () => {
+                if (image) {
+                    return bot.sendPhoto(chatId, image);
+                }
+                if (iframe) {
+                    return bot.sendMessage(chatId, `Нашел фрейм ${iframe}`);
+                }
+            }
+        );
     } catch (error) {
         bot.sendMessage(chatId, 'Ой! Что-то случилось! Может, попробуете еще раз?');
         console.log(`Ошибка в чате ${chatId}\n${error}`);
