@@ -60,6 +60,15 @@ const getWorkData = async (dom) => {
     return { fandom, title, downloadLink, summary }
 }
 
+const makeWorkAnswer = (title, fandom, downloadLink, summary, randomWorkUrl) => {
+    const text = ['<b>Случайная работа</b>', `<b>Название</b>: ${title}`, `<b>Фандом</b>: ${fandom}`];
+    text.push(`<b><a href="${ao3Url}${downloadLink}">EPUB</></b>`);
+    summary ? text.push(`<b>Саммари</b>: ${summary}`) : null;
+    text.push(`<b><a href="${ao3Url}${randomWorkUrl}">Документ</a></b>`);
+
+    return text;
+}
+
 bot.onText(/\/cit/, async (msg) => {
     const chatId = msg.chat.id;
     console.log(`Сделан запрос cit от чат айди ${chatId}`);
@@ -97,24 +106,16 @@ bot.onText(/\/cit/, async (msg) => {
         bot.editMessageText('Все нашел!', { chat_id: chatId, message_id: techMsgId });
         console.log(`Для чат айди ${chatId} загружена работа ${randomWorkUrl}`);
 
-        const text = ['<b>Случайная работа</b>', `<b>Название</b>: ${title}`, `<b>Фандом</b>: ${fandom}`];
-        text.push(`<b><a href="${ao3Url}${downloadLink}">EPUB</></b>`);
-        summary ? text.push(`<b>Саммари</b>: ${summary}`) : null;
-        text.push(`<b><a href="${ao3Url}${randomWorkUrl}">Документ</a></b>`);
+        const text = makeWorkAnswer(title, fandom, downloadLink, summary, randomWorkUrl);
 
-        bot.sendMessage(
-            chatId,
-            text.join('\n\n'),
-            { parse_mode: 'HTML' }
-        ).then(
-            () => {
+        bot.sendMessage(chatId, text.join('\n\n'), { parse_mode: 'HTML' })
+            .then(() => {
                 return bot.sendMessage(
                     chatId,
                     `<b>Случайный параграф</b>\n${randomParagraphText}`,
                     { parse_mode: 'HTML' }
                 );
-            }
-        );
+            });
 
         if (process.memoryUsage().heapUsed > 200000000) {
             global.gc();
@@ -149,28 +150,24 @@ bot.onText(/\/pic/, async (msg) => {
             iframe = dom.querySelector('#chapters .userstuff iframe').getAttribute('src');
         }
 
-        const text = ['<b>Случайная работа</b>', `<b>Название</b>: ${title}`, `<b>Фандом</b>: ${fandom}`];
-        text.push(`<b><a href="${ao3Url}${downloadLink}">EPUB</></b>`);
-        summary ? text.push(`<b>Саммари</b>: ${summary}`) : null;
-        text.push(`<b><a href="${ao3Url}${randomWorkUrl}">Документ</a></b>`);
+        const text = makeWorkAnswer(title, fandom, downloadLink, summary, randomWorkUrl);
 
         bot.editMessageText('Все нашел!', { chat_id: chatId, message_id: techMsgId });
         console.log(`Для чат айди ${chatId} загружена работа ${randomWorkUrl}`);
 
-        bot.sendMessage(
-            chatId,
-            text.join('\n\n'),
-            { parse_mode: 'HTML' }
-        ).then(
-            () => {
+        bot.sendMessage(chatId, text.join('\n\n'), { parse_mode: 'HTML' })
+            .then(() => {
                 if (image) {
                     return bot.sendPhoto(chatId, image);
                 }
                 if (iframe) {
                     return bot.sendMessage(chatId, `Нашел фрейм ${iframe}`);
                 }
-            }
-        );
+            });
+            
+        if (process.memoryUsage().heapUsed > 200000000) {
+            global.gc();
+        }
     } catch (error) {
         bot.sendMessage(chatId, 'Ой! Что-то случилось! Может, попробуете еще раз?');
         console.log(`Ошибка в чате ${chatId}\n${error}`);
