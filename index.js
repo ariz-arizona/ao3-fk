@@ -20,7 +20,7 @@ const searchWorkPage = async (chatId, techMsgId, queryAttrs) => {
     let pageQuery = {};
     let content;
     let dom;
-
+    console.log(chatId, techMsgId)
     content = await loadPage(`${worksUrl}${makeQueryString(queryAttrs)}`);
     dom = HTMLParser.parse(content);
 
@@ -60,10 +60,8 @@ bot.onText(/\/cit/, async (msg) => {
             'work_search%5Bwords_from%5D': 100
         };
 
-        let techMsgId;
-        bot.sendMessage(chatId, 'Открываю все работы').then(msg => {
-            techMsgId = msg.message_id;
-        });
+        const techMsg = await bot.sendMessage(chatId, 'Открываю все работы')
+        const techMsgId = techMsg.message_id;
 
         const { dom, randomWorkUrl } = await searchWorkPage(chatId, techMsgId, queryAttrs);
 
