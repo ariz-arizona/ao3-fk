@@ -16,51 +16,56 @@ const worksUrl = `${ao3Url}/tags/${fkTag2021}/works`;
 //todo продолжать работу при ошибке парсинга
 //todo ссылка на скачивание вместо урл страницы ??
 
+const searchWorkPage = async (chatId, techMsgId, queryAttrs) => {
+    let pageQuery = {};
+    let content;
+    let dom;
+
+    content = await loadPage(`${worksUrl}${makeQueryString(queryAttrs)}`);
+    dom = HTMLParser.parse(content);
+
+    const lastPageUrl = dom.querySelector('.pagination li:nth-last-child(2) a').getAttribute('href');
+    const searchParams = getSearchParametres(lastPageUrl);
+    const randomPage = getRandomInt(1, searchParams.page);
+
+    pageQuery = searchParams;
+    pageQuery.page = randomPage;
+
+    bot.editMessageText('Выбрал случайную страницу', { chat_id: chatId, message_id: techMsgId });
+
+    const randomPageUrl = `${worksUrl}${makeQueryString(pageQuery)}`;
+
+    content = await loadPage(`${randomPageUrl}`);
+    dom = HTMLParser.parse(content);
+
+    const worksCount = dom.querySelectorAll('.work > li').length - 1;
+    const randomWork = getRandomInt(0, worksCount);
+    const randomWorkUrl = dom.querySelectorAll('.work > li')[randomWork].querySelector('.heading > a').getAttribute('href');
+
+    bot.editMessageText(`Выбрал случайную работу ${randomWorkUrl}`, { chat_id: chatId, message_id: techMsgId });
+    console.log(`Для чат айди ${chatId} выбрана работа ${randomWorkUrl}`);
+
+    content = await loadPage(`${ao3Url}${randomWorkUrl}${makeQueryString({ 'view_full_work': 'true', 'view_adult': 'true' })}`);
+    dom = HTMLParser.parse(content);
+
+    return { dom, randomWorkUrl };
+}
+
 bot.onText(/\/cit/, async (msg) => {
     const chatId = msg.chat.id;
-    console.log(`Сделан запрос от чат айди ${chatId}`);
+    console.log(`Сделан запрос cit от чат айди ${chatId}`);
 
     try {
         const queryAttrs = {
             'work_search%5Bwords_from%5D': 100
         };
 
-        let pageQuery = {};
-
         let techMsgId;
         bot.sendMessage(chatId, 'Открываю все работы').then(msg => {
             techMsgId = msg.message_id;
         });
 
-        let content;
-        let dom;
-
-        content = await loadPage(`${worksUrl}${makeQueryString(queryAttrs)}`);
-        dom = HTMLParser.parse(content);
-
-        const lastPageUrl = dom.querySelector('.pagination li:nth-last-child(2) a').getAttribute('href');
-        const searchParams = getSearchParametres(lastPageUrl);
-        const randomPage = getRandomInt(1, searchParams.page);
-
-        pageQuery = searchParams;
-        pageQuery.page = randomPage;
-
-        bot.editMessageText('Выбрал случайную страницу', { chat_id: chatId, message_id: techMsgId });
-
-        const randomPageUrl = `${worksUrl}${makeQueryString(pageQuery)}`;
-
-        content = await loadPage(`${randomPageUrl}`);
-        dom = HTMLParser.parse(content);
-
-        const worksCount = dom.querySelectorAll('.work > li').length - 1;
-        const randomWork = getRandomInt(0, worksCount);
-        const randomWorkUrl = dom.querySelectorAll('.work > li')[randomWork].querySelector('.heading > a').getAttribute('href');
-
-        bot.editMessageText(`Выбрал случайную работу ${randomWorkUrl}`, { chat_id: chatId, message_id: techMsgId });
-        console.log(`Для чат айди ${chatId} выбрана работа ${randomWorkUrl}`);
-
-        content = await loadPage(`${ao3Url}${randomWorkUrl}${makeQueryString({ 'view_full_work': 'true', 'view_adult': 'true' })}`);
-        dom = HTMLParser.parse(content);
+        const { dom, randomWorkUrl } = await searchWorkPage(chatId, techMsgId, queryAttrs);
 
         const fandom = dom.querySelector('dd.fandom.tags').textContent.trim();
         const title = dom.querySelector('.title.heading').textContent.trim();
@@ -88,8 +93,8 @@ bot.onText(/\/cit/, async (msg) => {
         bot.editMessageText('Все нашел!', { chat_id: chatId, message_id: techMsgId });
         console.log(`Для чат айди ${chatId} загружена работа ${randomWorkUrl}`);
 
-        const text = ['<b>Случайная работа</b>', `<b>Название</b>: ${title}`,`<b>Фандом</b>: ${fandom}`];
-        text.push( `<b><a href="${ao3Url}${downloadLink}">EPUB</></b>`);
+        const text = ['<b>Случайная работа</b>', `<b>Название</b>: ${title}`, `<b>Фандом</b>: ${fandom}`];
+        text.push(`<b><a href="${ao3Url}${downloadLink}">EPUB</></b>`);
         summary ? text.push(`<b>Саммари</b>: ${summary}`) : null;
         text.push(`<b><a href="${ao3Url}${randomWorkUrl}">Документ</a></b>`);
 
@@ -117,6 +122,17 @@ bot.onText(/\/cit/, async (msg) => {
     }
 });
 
+bot.onText(/\/pic/, async (msg) => {
+    const chatId = msg.chat.id;
+    console.log(`Сделан запрос pic от чат айди ${chatId}`);
+
+    try {
+
+    } catch (error) {
+        bot.sendMessage(chatId, 'Ой! Что-то случилось! Может, попробуете еще раз?');
+        console.log(`Ошибка в чате ${chatId}\n${error}`);
+    }
+});
 bot.on('error', (error) => {
     console.log(error.code);
 });
