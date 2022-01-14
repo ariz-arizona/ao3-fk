@@ -59,10 +59,6 @@ bot.onText(/\/cit/, async (msg) => {
         bot.editMessageText(`Выбрал случайную работу ${randomWorkUrl}`, { chat_id: chatId, message_id: techMsgId });
         console.log(`Для чат айди ${chatId} выбрана работа ${randomWorkUrl}`);
 
-        // if (process.memoryUsage().heapUsed > 200000000) {
-        global.gc();
-        // }
-
         content = await loadPage(`${ao3Url}${randomWorkUrl}${makeQueryString({ 'view_full_work': 'true', 'view_adult': 'true' })}`);
         dom = HTMLParser.parse(content);
 
