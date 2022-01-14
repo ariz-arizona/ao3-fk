@@ -92,9 +92,14 @@ bot.onText(/\/cit/, async (msg) => {
         bot.editMessageText('Все нашел!', { chat_id: chatId, message_id: techMsgId });
         console.log(`Для чат айди ${chatId} загружена работа ${randomWorkUrl}`);
 
+        const text = ['<b>Случайная работа</b>', `<b>Название</b>: ${title}`,`<b>Фандом</b>: ${fandom}`];
+        text.push( `<b><a href="${ao3Url}${downloadLink}">EPUB</></b>`);
+        summary ? text.push(`<b>Саммари</b>: ${summary}`) : null;
+        text.push(`<b><a href="${ao3Url}${randomWorkUrl}">Документ</a></b>`);
+
         bot.sendMessage(
             chatId,
-            `<b>Случайная работа</b>\n\n<b>Название</b>: ${title}\n\n<b>Фандом</b>: ${fandom}\n\n<b><a href="${ao3Url}${downloadLink}">EPUB</></b>\n\n<b>Саммари</b>: ${summary}\n\n<b><a href="${ao3Url}${randomWorkUrl}">Документ</a></b>`,
+            text.join('\n\n'),
             { parse_mode: 'HTML' }
         ).then(
             () => {
