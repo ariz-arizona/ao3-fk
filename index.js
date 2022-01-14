@@ -20,7 +20,7 @@ const searchWorkPage = async (chatId, techMsgId, queryAttrs) => {
     let pageQuery = {};
     let content;
     let dom;
-    console.log(chatId, techMsgId)
+
     content = await loadPage(`${worksUrl}${makeQueryString(queryAttrs)}`);
     dom = HTMLParser.parse(content);
 
@@ -51,6 +51,15 @@ const searchWorkPage = async (chatId, techMsgId, queryAttrs) => {
     return { dom, randomWorkUrl };
 }
 
+const getWorkData = async (dom) => {
+    const fandom = dom.querySelector('dd.fandom.tags').textContent.trim();
+    const title = dom.querySelector('.title.heading').textContent.trim();
+    const downloadLink = dom.querySelector('.download > ul > li:nth-child(2) > a').getAttribute('href');
+    const summary = dom.querySelector('.summary .userstuff') ? dom.querySelector('.summary .userstuff').textContent.trim() : '';
+
+    return {fandom, title, downloadLink, summary}
+}
+
 bot.onText(/\/cit/, async (msg) => {
     const chatId = msg.chat.id;
     console.log(`Сделан запрос cit от чат айди ${chatId}`);
@@ -64,11 +73,8 @@ bot.onText(/\/cit/, async (msg) => {
         const techMsgId = techMsg.message_id;
 
         const { dom, randomWorkUrl } = await searchWorkPage(chatId, techMsgId, queryAttrs);
+        const {fandom, title, downloadLink, summary} = await getWorkData(dom);
 
-        const fandom = dom.querySelector('dd.fandom.tags').textContent.trim();
-        const title = dom.querySelector('.title.heading').textContent.trim();
-        const downloadLink = dom.querySelector('.download > ul > li:nth-child(2) > a').getAttribute('href');
-        const summary = dom.querySelector('.summary .userstuff') ? dom.querySelector('.summary .userstuff').textContent.trim() : '';
         const paragraphs = dom.querySelectorAll('#chapters .userstuff p');
 
         bot.editMessageText('Ищу случайный абзац', { chat_id: chatId, message_id: techMsgId });
