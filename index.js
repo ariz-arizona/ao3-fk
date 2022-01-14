@@ -56,7 +56,7 @@ bot.onText(/\/cit/, async (msg) => {
         const randomWork = getRandomInt(0, worksCount);
         const randomWorkUrl = dom.querySelectorAll('.work > li')[randomWork].querySelector('.heading > a').getAttribute('href');
 
-        bot.editMessageText('Выбрал случайную работу', { chat_id: chatId, message_id: techMsgId });
+        bot.editMessageText(`Выбрал случайную работу ${randomWorkUrl}`, { chat_id: chatId, message_id: techMsgId });
         console.log(`Для чат айди ${chatId} выбрана работа ${randomWorkUrl}`);
 
         // if (process.memoryUsage().heapUsed > 200000000) {
