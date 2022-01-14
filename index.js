@@ -60,7 +60,7 @@ bot.onText(/\/cit/, async (msg) => {
         console.log(`Для чат айди ${chatId} выбрана работа ${randomWorkUrl}`);
 
         // if (process.memoryUsage().heapUsed > 200000000) {
-            global.gc();
+        global.gc();
         // }
 
         content = await loadPage(`${ao3Url}${randomWorkUrl}${makeQueryString({ 'view_full_work': 'true', 'view_adult': 'true' })}`);
@@ -76,14 +76,18 @@ bot.onText(/\/cit/, async (msg) => {
 
         let randomParagraph, randomParagraphText;
         let i = 0;
-        const paragraphsCount = paragraphs.length - 1;
 
         do {
-            randomParagraph = getRandomInt(0, paragraphsCount);
+            randomParagraph = getRandomInt(0, paragraphs.length - 1);
             randomParagraphText = paragraphs[randomParagraph].textContent.trim().substring(0, 2048);
+
+            if (randomParagraphText === '') {
+                paragraphs.splice(randomParagraph, 1)
+            }
+
             bot.editMessageText(`Ищу случайный абзац ${i + 1} раз`, { chat_id: chatId, message_id: techMsgId });
             i++;
-        } while (randomParagraphText === '' || i > 5)
+        } while (randomParagraphText === '' && i < 5)
 
         bot.editMessageText('Все нашел!', { chat_id: chatId, message_id: techMsgId });
         console.log(`Для чат айди ${chatId} загружена работа ${randomWorkUrl}`);
