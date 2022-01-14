@@ -70,7 +70,7 @@ bot.onText(/\/cit/, async (msg) => {
         const title = dom.querySelector('.title.heading').textContent.trim();
         const downloadLink = dom.querySelector('.download > ul > li:nth-child(2) > a').getAttribute('href');
         const summary = dom.querySelector('.summary .userstuff') ? dom.querySelector('.summary .userstuff').textContent.trim() : '';
-        const paragraphs = dom.querySelectorAll('#chapters .userstuff > p');
+        const paragraphs = dom.querySelectorAll('#chapters .userstuff p');
 
         bot.editMessageText('Ищу случайный абзац', { chat_id: chatId, message_id: techMsgId });
 
