@@ -142,12 +142,22 @@ bot.onText(/\/pic/, async (msg) => {
         const { dom, randomWorkUrl } = await searchWorkPage(chatId, techMsgId, queryAttrs);
         const { fandom, title, downloadLink, summary } = await getWorkData(dom);
 
-        let image = [], iframe;
-        if (dom.querySelectorAll('#chapters .userstuff img').length > 0) {
-            image = dom.querySelectorAll('#chapters .userstuff img')[0].getAttribute('src');
-        }
-        if (dom.querySelector('#chapters .userstuff iframe')) {
-            iframe = dom.querySelector('#chapters .userstuff iframe').getAttribute('src');
+        //если картинка очень большая - не грузить, давать ссылку
+        const mediaElements = dom.querySelectorAll('#chapters .userstuff img, #chapters .userstuff iframe');
+        const images = [];
+        const otherLinks = [];
+
+        if (mediaElements.length > 0) {
+            mediaElements.forEach(item => {
+                if (item.tagName === 'IMG') {
+                    images.push({
+                        type: 'photo',
+                        media: item.getAttribute('src')
+                    })
+                } else {
+                    otherLinks.push(item.getAttribute('src'));
+                }
+            })
         }
 
         const text = makeWorkAnswer(title, fandom, downloadLink, summary, randomWorkUrl);
@@ -157,14 +167,14 @@ bot.onText(/\/pic/, async (msg) => {
 
         bot.sendMessage(chatId, text.join('\n\n'), { parse_mode: 'HTML' })
             .then(() => {
-                if (image) {
-                    return bot.sendPhoto(chatId, image);
+                if (otherLinks.length) {
+                    otherLinks.forEach(link => {
+                        return bot.sendMessage(chatId, `Я нашел видео, посмотрите его по ссылке:\n${link}`);
+                    })
                 }
-                if (iframe) {
-                    return bot.sendMessage(chatId, `Нашел фрейм ${iframe}`);
-                }
+                return bot.sendMediaGroup(chatId, images);
             });
-            
+
         if (process.memoryUsage().heapUsed > 200000000) {
             global.gc();
         }
