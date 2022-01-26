@@ -19,7 +19,7 @@ bot.onText(/\/set/, async (msg) => {
     console.log(`Сделан запрос set от чат айди ${chatId}`);
 
     try {
-        const techMsg = await bot.sendMessage(
+        await bot.sendMessage(
             chatId,
             'Выберите битву:',
             {
@@ -37,8 +37,6 @@ bot.onText(/\/set/, async (msg) => {
                 }
             }
         );
-        const techMsgId = techMsg.message_id;
-
     } catch (error) {
         bot.sendMessage(chatId, 'Ой! Что-то случилось! Может, попробуете еще раз?');
         console.log(`Ошибка в чате ${chatId}\n${error}`);
@@ -175,6 +173,14 @@ bot.on('callback_query', function onCallbackQuery(callbackQuery) {
     if (action.indexOf('set_') === 0) {
         const vars = action.replace('set_', '').split('_');
         additionalTag = fkTagYears[vars[0]];
+                
+        bot.sendMessage(chatId, 'Погадаем?', {
+            reply_markup: {
+                keyboard: [['/cit', '/pic']],
+                resize_keyboard: true,
+                one_time_keyboard: false
+            }
+        })
     }
 
     return bot.answerCallbackQuery(callbackQuery.id);
