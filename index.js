@@ -3,6 +3,7 @@ const TelegramBot = require('node-telegram-bot-api');
 
 const { getRandomInt } = require('./helpers');
 const { searchWorkPage, getWorkData, makeWorkAnswer } = require('./func');
+const { fkTagYears } = require('./constants');
 
 const { BOT_TOKEN } = process.env;
 
@@ -11,12 +12,46 @@ const bot = new TelegramBot(BOT_TOKEN, { polling: true });
 //todo продолжать работу при ошибке парсинга
 //todo ссылка на скачивание вместо урл страницы ??
 
+let additionalTag = fkTagYears[2020];
+
+bot.onText(/\/set/, async (msg) => {
+    const chatId = msg.chat.id;
+    console.log(`Сделан запрос set от чат айди ${chatId}`);
+
+    try {
+        const techMsg = await bot.sendMessage(
+            chatId,
+            'Выберите битву:',
+            {
+                reply_markup: {
+                    inline_keyboard: [
+                        [
+                            { text: '2020', callback_data: 'set_2020' },
+                            { text: '2021', callback_data: 'set_2021' },
+                            { text: '2022', callback_data: 'set_2022' },
+                        ],
+                        [
+                            { text: 'ВСЕ БИТВЫ', callback_data: 'set_fkall' }
+                        ]
+                    ]
+                }
+            }
+        );
+        const techMsgId = techMsg.message_id;
+
+    } catch (error) {
+        bot.sendMessage(chatId, 'Ой! Что-то случилось! Может, попробуете еще раз?');
+        console.log(`Ошибка в чате ${chatId}\n${error}`);
+    }
+})
+
 bot.onText(/\/cit/, async (msg) => {
     const chatId = msg.chat.id;
     console.log(`Сделан запрос cit от чат айди ${chatId}`);
 
     try {
         const queryAttrs = {
+            'work_search%5Bother_tag_names%5D': additionalTag,
             'work_search%5Bwords_from%5D': 100
         };
 
@@ -75,6 +110,7 @@ bot.onText(/\/pic/, async (msg) => {
 
     try {
         const queryAttrs = {
+            'work_search%5Bother_tag_names%5D': additionalTag,
             'work_search%5Bwords_to%5D': 100
         };
 
@@ -125,6 +161,21 @@ bot.onText(/\/pic/, async (msg) => {
         console.log(`Ошибка в чате ${chatId}\n${error}`);
     }
 });
+
+bot.on('callback_query', function onCallbackQuery(callbackQuery) {
+    const action = callbackQuery.data;
+    const msg = callbackQuery.message;
+    const chatId = msg.chat.id;
+    // message_id: msg.message_id,
+
+    if (action.indexOf('set_') === 0) {
+        const vars = action.replace('set_', '').split('_');
+        additionalTag = fkTagYears[vars[0]];
+    }
+
+    return bot.answerCallbackQuery(callbackQuery.id);
+});
+
 bot.on('error', (error) => {
     console.log(error.code);
 });

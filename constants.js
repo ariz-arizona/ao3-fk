@@ -1,7 +1,12 @@
 const fkTag = 'Fandom%20Kombat';
-const fkTag2021 = 'Fandom%20Kombat%202021';
 const ao3Url = 'https://archiveofourown.org';
 
-const worksUrl = `${ao3Url}/tags/${fkTag2021}/works`;
+const fkTagYears = {
+    2020: 'Fandom%20Kombat%202020',
+    2021: 'Fandom%20Kombat%202021',
+    2022: 'Fandom%20Kombat%202022'
+}
 
-module.exports = {worksUrl, ao3Url, fkTag}
+const worksUrl = `${ao3Url}/tags/${fkTag}/works`;
+
+module.exports = { worksUrl, ao3Url, fkTag, fkTagYears }
