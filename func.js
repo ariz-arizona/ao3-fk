@@ -12,6 +12,10 @@ const searchWorkPage = async (bot, chatId, techMsgId, queryAttrs) => {
     content = await loadPage(`${worksUrl}${makeQueryString(queryAttrs)}`);
     dom = HTMLParser.parse(content);
 
+    if (!dom.querySelector('.pagination li:nth-last-child(2) a')) {
+        throw new Error('notfound');
+    }
+
     const lastPageUrl = dom.querySelector('.pagination li:nth-last-child(2) a').getAttribute('href');
     const searchParams = getSearchParametres(lastPageUrl);
     const randomPage = getRandomInt(1, searchParams.page);
@@ -57,4 +61,16 @@ const makeWorkAnswer = (title, fandom, downloadLink, summary, randomWorkUrl) => 
     return text;
 }
 
-module.exports = { searchWorkPage, getWorkData, makeWorkAnswer }
+const showError = (bot, chatId, error) => {
+    let msg;
+    switch (error.message) {
+        case 'Error: notfound':
+            msg = 'Я ничего не нашел :('
+        default:
+            msg = 'Ой! Что-то случилось! Может, попробуете еще раз?';
+    }
+    bot.sendMessage(chatId, msg);
+    console.log(`Ошибка в чате ${chatId}\n${error}`);
+}
+
+module.exports = { searchWorkPage, getWorkData, makeWorkAnswer, showError }

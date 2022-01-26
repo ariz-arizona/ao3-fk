@@ -2,7 +2,7 @@ require('dotenv').config()
 const TelegramBot = require('node-telegram-bot-api');
 
 const { getRandomInt } = require('./helpers');
-const { searchWorkPage, getWorkData, makeWorkAnswer } = require('./func');
+const { searchWorkPage, getWorkData, makeWorkAnswer, showError } = require('./func');
 const { fkTagYears } = require('./constants');
 
 const { BOT_TOKEN } = process.env;
@@ -99,8 +99,7 @@ bot.onText(/\/cit/, async (msg) => {
         }
 
     } catch (error) {
-        bot.sendMessage(chatId, 'Ой! Что-то случилось! Может, попробуете еще раз?');
-        console.log(`Ошибка в чате ${chatId}\n${error}`);
+        showError(bot, chatId, error);
     }
 });
 
@@ -157,8 +156,7 @@ bot.onText(/\/pic/, async (msg) => {
             global.gc();
         }
     } catch (error) {
-        bot.sendMessage(chatId, 'Ой! Что-то случилось! Может, попробуете еще раз?');
-        console.log(`Ошибка в чате ${chatId}\n${error}`);
+        showError(bot, chatId, error);
     }
 });
 
