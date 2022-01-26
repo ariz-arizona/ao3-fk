@@ -51,9 +51,12 @@ bot.onText(/\/cit/, async (msg) => {
 
     try {
         const queryAttrs = {
-            'work_search%5Bother_tag_names%5D': additionalTag,
             'work_search%5Bwords_from%5D': 100
         };
+
+        if (additionalTag) {
+            queryAttrs['work_search%5Bother_tag_names%5D'] = additionalTag;
+        }
 
         const techMsg = await bot.sendMessage(chatId, 'Открываю все работы')
         const techMsgId = techMsg.message_id;
@@ -109,9 +112,12 @@ bot.onText(/\/pic/, async (msg) => {
 
     try {
         const queryAttrs = {
-            'work_search%5Bother_tag_names%5D': additionalTag,
             'work_search%5Bwords_to%5D': 100
         };
+
+        if (additionalTag) {
+            queryAttrs['work_search%5Bother_tag_names%5D'] = additionalTag;
+        }
 
         const techMsg = await bot.sendMessage(chatId, 'Открываю все работы')
         const techMsgId = techMsg.message_id;

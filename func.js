@@ -64,7 +64,7 @@ const makeWorkAnswer = (title, fandom, downloadLink, summary, randomWorkUrl) => 
 const showError = (bot, chatId, error) => {
     let msg;
     switch (error.message) {
-        case 'Error: notfound':
+        case 'notfound':
             msg = 'Я ничего не нашел :('
         default:
             msg = 'Ой! Что-то случилось! Может, попробуете еще раз?';
