@@ -12,7 +12,7 @@ const bot = new TelegramBot(BOT_TOKEN, { polling: true });
 //todo продолжать работу при ошибке парсинга
 //todo ссылка на скачивание вместо урл страницы ??
 
-let additionalTag = fkTagYears[2020];
+let additionalTag = fkTagYears[w2022];
 
 bot.onText(/\/set/, async (msg) => {
     const chatId = msg.chat.id;
@@ -27,8 +27,14 @@ bot.onText(/\/set/, async (msg) => {
                     inline_keyboard: [
                         [
                             { text: '2020', callback_data: 'set_2020' },
+                            { text: 'Winter 2020', callback_data: 'set_w2020' },
+                        ],
+                        [
                             { text: '2021', callback_data: 'set_2021' },
-                            { text: '2022', callback_data: 'set_2022' },
+                            { text: 'Winter 2021', callback_data: 'set_w2021' },
+                        ],
+                        [
+                            { text: 'Winter 2022', callback_data: 'set_w2022' },
                         ],
                         [
                             { text: 'ВСЕ БИТВЫ', callback_data: 'set_fkall' }
@@ -173,7 +179,7 @@ bot.on('callback_query', function onCallbackQuery(callbackQuery) {
     if (action.indexOf('set_') === 0) {
         const vars = action.replace('set_', '').split('_');
         additionalTag = fkTagYears[vars[0]];
-                
+
         bot.sendMessage(chatId, 'Погадаем?', {
             reply_markup: {
                 keyboard: [['/cit', '/pic']],
