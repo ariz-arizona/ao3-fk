@@ -2,8 +2,8 @@ require('dotenv').config()
 const TelegramBot = require('node-telegram-bot-api');
 
 const { getRandomInt } = require('./helpers');
-const { searchWorkPage, getWorkData, makeWorkAnswer, showError } = require('./func');
-const { fkTagYears } = require('./constants');
+const { searchWorkPage, getWorkData, makeWorkAnswer, showError, makeWorksUrl } = require('./func');
+const { fkTagYears, fkTag, winterFkTag } = require('./constants');
 
 const { BOT_TOKEN } = process.env;
 
@@ -12,7 +12,8 @@ const bot = new TelegramBot(BOT_TOKEN, { polling: true });
 //todo продолжать работу при ошибке парсинга
 //todo ссылка на скачивание вместо урл страницы ??
 
-let additionalTag = fkTagYears[w2022];
+let additionalTag = fkTagYears['w2022'];
+let seasonTag = fkTag;
 
 bot.onText(/\/set/, async (msg) => {
     const chatId = msg.chat.id;
@@ -27,17 +28,18 @@ bot.onText(/\/set/, async (msg) => {
                     inline_keyboard: [
                         [
                             { text: '2020', callback_data: 'set_2020' },
-                            { text: 'Winter 2020', callback_data: 'set_w2020' },
+                            { text: 'Winter 2020', callback_data: 'set_w2020_w' },
                         ],
                         [
                             { text: '2021', callback_data: 'set_2021' },
-                            { text: 'Winter 2021', callback_data: 'set_w2021' },
+                            { text: 'Winter 2021', callback_data: 'set_w2021_w' },
                         ],
                         [
-                            { text: 'Winter 2022', callback_data: 'set_w2022' },
+                            { text: 'Winter 2022', callback_data: 'set_w2022_w' },
                         ],
                         [
-                            { text: 'ВСЕ БИТВЫ', callback_data: 'set_fkall' }
+                            { text: 'ВСЕ БИТВЫ', callback_data: 'set_fkall' },
+                            { text: 'ВСЕ ЗИМНИЕ БИТВЫ', callback_data: 'set_fkall_w' }
                         ]
                     ]
                 }
@@ -65,7 +67,9 @@ bot.onText(/\/cit/, async (msg) => {
         const techMsg = await bot.sendMessage(chatId, 'Открываю все работы')
         const techMsgId = techMsg.message_id;
 
-        const { dom, randomWorkUrl } = await searchWorkPage(bot, chatId, techMsgId, queryAttrs);
+        const worksUrl = makeWorksUrl(seasonTag);
+
+        const { dom, randomWorkUrl } = await searchWorkPage(bot, chatId, worksUrl, techMsgId, queryAttrs);
         const { fandom, title, downloadLink, summary } = await getWorkData(dom);
 
         const paragraphs = dom.querySelectorAll('#chapters .userstuff p');
@@ -126,7 +130,9 @@ bot.onText(/\/pic/, async (msg) => {
         const techMsg = await bot.sendMessage(chatId, 'Открываю все работы')
         const techMsgId = techMsg.message_id;
 
-        const { dom, randomWorkUrl } = await searchWorkPage(bot, chatId, techMsgId, queryAttrs);
+        const worksUrl = makeWorksUrl(seasonTag);
+
+        const { dom, randomWorkUrl } = await searchWorkPage(bot, chatId, worksUrl, techMsgId, queryAttrs);
         const { fandom, title, downloadLink, summary } = await getWorkData(dom);
 
         //если картинка очень большая - не грузить, давать ссылку
@@ -179,6 +185,10 @@ bot.on('callback_query', function onCallbackQuery(callbackQuery) {
     if (action.indexOf('set_') === 0) {
         const vars = action.replace('set_', '').split('_');
         additionalTag = fkTagYears[vars[0]];
+
+        if(vars[1] === 'w') {
+            seasonTag = winterFkTag;
+        }
 
         bot.sendMessage(chatId, 'Погадаем?', {
             reply_markup: {

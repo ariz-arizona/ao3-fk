@@ -1,4 +1,5 @@
 const fkTag = 'Fandom%20Kombat';
+const winterFkTag = 'WTF%20%7C%20Winter%20Temporary%20Fandom%20Kombat';
 const ao3Url = 'https://archiveofourown.org';
 
 const fkTagYears = {
@@ -11,4 +12,4 @@ const fkTagYears = {
 
 const worksUrl = `${ao3Url}/tags/${fkTag}/works`;
 
-module.exports = { worksUrl, ao3Url, fkTag, fkTagYears }
+module.exports = { worksUrl, ao3Url, fkTag, winterFkTag, fkTagYears }

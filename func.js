@@ -1,10 +1,10 @@
 const HTMLParser = require('node-html-parser');
 
-const { worksUrl, ao3Url } = require('./constants');
+const { ao3Url } = require('./constants');
 const { getRandomInt, makeQueryString, getSearchParametres, loadPage } = require('./helpers');
 
 //todo глобальные переменные?
-const searchWorkPage = async (bot, chatId, techMsgId, queryAttrs) => {
+const searchWorkPage = async (bot, chatId, worksUrl, techMsgId, queryAttrs) => {
     let pageQuery = {};
     let content;
     let dom;
@@ -73,4 +73,8 @@ const showError = (bot, chatId, error) => {
     console.log(`Ошибка в чате ${chatId}\n${error}`);
 }
 
-module.exports = { searchWorkPage, getWorkData, makeWorkAnswer, showError }
+const makeWorksUrl = (seasonTag) => {
+    return `${ao3Url}/tags/${seasonTag}/works`
+}
+
+module.exports = { searchWorkPage, getWorkData, makeWorkAnswer, makeWorksUrl, showError }
