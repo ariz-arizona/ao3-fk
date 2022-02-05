@@ -72,7 +72,6 @@ bot.onText(/\/cit/, async (msg) => {
         console.log(queryAttrs);
 
         const techMsg = await bot.sendMessage(chatId, 'Открываю все работы');
-        bot.processUpdate()
         const techMsgId = techMsg.message_id;
         console.log(techMsgId);
 
