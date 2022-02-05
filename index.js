@@ -6,9 +6,12 @@ const { searchWorkPage, getWorkData, makeWorkAnswer, showError, makeWorksUrl } =
 const { fkTagYears, fkTag, winterFkTag, ao3Url } = require('./constants');
 
 const { BOT_TOKEN } = process.env;
+const APP_PORT = 3000;
+const CURRENT_HOST = 'https://ao3-fk-ariz-arizona.vercel.app';
+
+const app = express();
 
 const bot = new TelegramBot(BOT_TOKEN);
-bot.setWebHook('https://ao3-fk-ariz-arizona.vercel.app');
 
 //todo продолжать работу при ошибке парсинга
 //todo ссылка на скачивание вместо урл страницы ??
@@ -251,3 +254,15 @@ bot.on('error', (error) => {
 bot.on('polling_error', (error) => {
     console.log(error);
 });
+
+app.use(bot.webhookCallback('/callback'))
+
+app.get('/', async (_req, res) => {
+    const url = `${CURRENT_HOST}/callback`
+    await bot.telegram.setWebhook(url)
+    res.send(`listening on ${CURRENT_HOST}`)
+})
+
+app.listen(APP_PORT, () => {
+    console.log(`listening on ${APP_PORT}`)
+})
