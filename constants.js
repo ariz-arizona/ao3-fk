@@ -11,8 +11,8 @@ const fkTagYears = {
 }
 
 const fkTagCollections = {
-    2021: FandomKombat2021,
-    2020: FandomKombat2020,
+    2021: 'FandomKombat2021',
+    2020: 'FandomKombat2020',
 }
 
 const worksUrl = `${ao3Url}/tags/${fkTag}/works`;
