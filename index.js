@@ -256,7 +256,7 @@ bot.on('polling_error', (error) => {
     console.log(error);
 });
 
-// app.use();
+app.use(express.json());
 
 app.get('/', async (_req, res) => {
     const url = `${CURRENT_HOST}/callback`;
