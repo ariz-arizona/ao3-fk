@@ -57,6 +57,7 @@ bot.onText(/\/set/, async (msg) => {
 })
 
 bot.onText(/\/cit/, async (msg) => {
+    bot.processUpdate(msg)
     const chatId = msg.chat.id;
     console.log(`Сделан запрос cit от чат айди ${chatId}`);
 
@@ -265,7 +266,7 @@ app.get('/', async (_req, res) => {
 });
 
 app.post('/callback', async (_req, res) => {
-    bot.processUpdate(_req.body);
+    await bot.processUpdate(_req.body);
     res.sendStatus(200);
 });
 
