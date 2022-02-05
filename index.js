@@ -255,14 +255,14 @@ bot.on('polling_error', (error) => {
     console.log(error);
 });
 
-app.use(bot.webhookCallback('/callback'))
+app.use();
 
 app.get('/', async (_req, res) => {
-    const url = `${CURRENT_HOST}/callback`
-    await bot.telegram.setWebhook(url)
+    const url = `${CURRENT_HOST}/callback`;
+    await bot.setWebhook(url);
     res.send(`listening on ${CURRENT_HOST}`)
-})
+});
 
 app.listen(APP_PORT, () => {
     console.log(`listening on ${APP_PORT}`)
-})
+});
