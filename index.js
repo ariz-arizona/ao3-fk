@@ -7,13 +7,13 @@ const { searchWorkPage, getWorkData, makeWorkAnswer, showError, makeWorksUrl } =
 const { fkTagYears, fkTag, winterFkTag, ao3Url } = require('./constants');
 
 const { BOT_TOKEN } = process.env;
-const APP_PORT = 3000;
+const APP_PORT = 443;
 const CURRENT_HOST = 'https://ao3-fk-ariz-arizona.vercel.app';
 
 const app = express();
 
 const bot = new TelegramBot(BOT_TOKEN);
-bot.setWebHook(`${CURRENT_HOST}/callback`, { allowed_updates: ["message", "edited_message", "callback_query", "inline_query"] });
+bot.setWebHook(`${CURRENT_HOST}/callback${BOT_TOKEN}:${APP_PORT}`, { allowed_updates: ["message", "edited_message", "callback_query", "inline_query"] });
 
 //todo продолжать работу при ошибке парсинга
 //todo ссылка на скачивание вместо урл страницы ??
@@ -269,13 +269,7 @@ app.get('/', async (_req, res) => {
     res.send(`listening on ${CURRENT_HOST}`)
 });
 
-app.post('/callback', async (_req, res) => {
-    // console.log(_req.body);
-    bot.processUpdate(_req.body);
-    res.sendStatus(200);
-});
-
-app.get('/callback', async (_req, res) => {
+app.post(`/callback${BOT_TOKEN}`, async (_req, res) => {
     // console.log(_req.body);
     bot.processUpdate(_req.body);
     res.sendStatus(200);
