@@ -5,6 +5,7 @@ const { getRandomInt, makeQueryString, getSearchParametres, loadPage } = require
 
 //todo глобальные переменные?
 const searchWorkPage = async (bot, chatId, worksUrl, techMsgId, queryAttrs) => {
+    console.log(`search work page ${chatId}`)
     let pageQuery = {};
     let content;
     let dom;
