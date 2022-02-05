@@ -208,7 +208,7 @@ bot.onText(/\/pic/, async (msg) => {
     }
 });
 
-bot / onText(/\/collection/, async (msg) => {
+bot.onText(/\/collection/, async (msg) => {
     const chatId = msg.chat.id;
     console.log(`Сделан запрос collection от чат айди ${chatId}`);
 
