@@ -65,19 +65,21 @@ bot.onText(/\/cit/, async (msg) => {
         const queryAttrs = {
             'work_search%5Bwords_from%5D': 100
         };
-
+        
         if (additionalTag) {
             queryAttrs['work_search%5Bother_tag_names%5D'] = additionalTag;
         }
+        console.log(queryAttrs);
 
         const techMsg = await bot.sendMessage(chatId, 'Открываю все работы')
         const techMsgId = techMsg.message_id;
-        console.log(techMsg);
+        console.log(techMsgId);
 
         const worksUrl = makeWorksUrl(seasonTag);
 
         const { dom, randomWorkUrl } = await searchWorkPage(bot, chatId, worksUrl, techMsgId, queryAttrs);
         const { fandom, title, downloadLink, summary } = await getWorkData(dom);
+        console.log(fandom);
 
         const paragraphs = dom.querySelectorAll('#chapters .userstuff p');
 
