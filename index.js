@@ -21,201 +21,167 @@ bot.setWebHook(`${CURRENT_HOST}/callback`, { allowed_updates: ["message", "edite
 let additionalTag = fkTagYears['w2022'];
 let seasonTag = winterFkTag;
 
-bot.onText(/\/set/, async (msg) => {
-    const chatId = msg.chat.id;
-    console.log(`Сделан запрос set от чат айди ${chatId}`);
+const setFunction = async (chatId) => {
 
-    try {
-        await bot.sendMessage(
-            chatId,
-            'Выберите битву:',
-            {
-                reply_markup: {
-                    inline_keyboard: [
-                        [
-                            { text: '2020', callback_data: 'set_2020' },
-                            { text: 'Winter 2020', callback_data: 'set_w2020_w' },
-                        ],
-                        [
-                            { text: '2021', callback_data: 'set_2021' },
-                            { text: 'Winter 2021', callback_data: 'set_w2021_w' },
-                        ],
-                        [
-                            { text: 'Winter 2022', callback_data: 'set_w2022_w' },
-                        ],
-                        [
-                            { text: 'ВСЕ БИТВЫ', callback_data: 'set_fkall' },
-                            { text: 'ВСЕ ЗИМНИЕ БИТВЫ', callback_data: 'set_fkall_w' }
-                        ]
+    await bot.sendMessage(
+        chatId,
+        'Выберите битву:',
+        {
+            reply_markup: {
+                inline_keyboard: [
+                    [
+                        { text: '2020', callback_data: 'set_2020' },
+                        { text: 'Winter 2020', callback_data: 'set_w2020_w' },
+                    ],
+                    [
+                        { text: '2021', callback_data: 'set_2021' },
+                        { text: 'Winter 2021', callback_data: 'set_w2021_w' },
+                    ],
+                    [
+                        { text: 'Winter 2022', callback_data: 'set_w2022_w' },
+                    ],
+                    [
+                        { text: 'ВСЕ БИТВЫ', callback_data: 'set_fkall' },
+                        { text: 'ВСЕ ЗИМНИЕ БИТВЫ', callback_data: 'set_fkall_w' }
                     ]
-                }
+                ]
             }
-        );
-    } catch (error) {
-        bot.sendMessage(chatId, 'Ой! Что-то случилось! Может, попробуете еще раз?');
-        console.log(`Ошибка в чате ${chatId}\n${error}`);
-    }
-})
-
-bot.onText(/\/cit/, async (msg) => {
-    bot.processUpdate(msg)
-    const chatId = msg.chat.id;
-    console.log(`Сделан запрос cit от чат айди ${chatId}`);
-
-    try {
-        const queryAttrs = {
-            'work_search%5Bwords_from%5D': 100
-        };
-        
-        if (additionalTag) {
-            queryAttrs['work_search%5Bother_tag_names%5D'] = additionalTag;
         }
-        console.log(queryAttrs);
+    );
+};
 
-        const techMsg = await bot.sendMessage(chatId, 'Открываю все работы');
-        console.log(techMsg);
-        const techMsgId = techMsg.message_id;
+const citFunction = async (chatId) => {
+    const queryAttrs = {
+        'work_search%5Bwords_from%5D': 100
+    };
 
-        const worksUrl = makeWorksUrl(seasonTag);
+    if (additionalTag) {
+        queryAttrs['work_search%5Bother_tag_names%5D'] = additionalTag;
+    }
 
-        const { dom, randomWorkUrl } = await searchWorkPage(bot, chatId, worksUrl, techMsgId, queryAttrs);
-        const { fandom, title, downloadLink, summary } = await getWorkData(dom);
-        console.log(fandom);
+    const techMsg = await bot.sendMessage(chatId, 'Открываю все работы');
+    const techMsgId = techMsg.message_id;
 
-        const paragraphs = dom.querySelectorAll('#chapters .userstuff p');
+    const worksUrl = makeWorksUrl(seasonTag);
 
-        bot.editMessageText('Ищу случайный абзац', { chat_id: chatId, message_id: techMsgId });
+    const { dom, randomWorkUrl } = await searchWorkPage(bot, chatId, worksUrl, techMsgId, queryAttrs);
+    const { fandom, title, downloadLink, summary } = await getWorkData(dom);
 
-        let randomParagraph, randomParagraphText;
-        let i = 0;
+    const paragraphs = dom.querySelectorAll('#chapters .userstuff p');
 
-        do {
-            randomParagraph = getRandomInt(0, paragraphs.length - 1);
-            randomParagraphText = paragraphs[randomParagraph].textContent.trim().substring(0, 2048);
+    bot.editMessageText('Ищу случайный абзац', { chat_id: chatId, message_id: techMsgId });
 
-            if (randomParagraphText === '') {
-                paragraphs.splice(randomParagraph, 1)
+    let randomParagraph, randomParagraphText;
+    let i = 0;
+
+    do {
+        randomParagraph = getRandomInt(0, paragraphs.length - 1);
+        randomParagraphText = paragraphs[randomParagraph].textContent.trim().substring(0, 2048);
+
+        if (randomParagraphText === '') {
+            paragraphs.splice(randomParagraph, 1)
+        }
+
+        bot.editMessageText(`Ищу случайный абзац ${i + 1} раз`, { chat_id: chatId, message_id: techMsgId });
+        i++;
+    } while (randomParagraphText === '' && i < 5)
+
+    bot.editMessageText('Все нашел!', { chat_id: chatId, message_id: techMsgId });
+
+    const text = makeWorkAnswer(title, fandom, summary);
+
+    bot.sendMessage(
+        chatId,
+        text.join('\n\n'),
+        {
+            parse_mode: 'HTML',
+            reply_markup: {
+                inline_keyboard: [
+                    [
+                        { text: 'Работа на AO3', url: `${ao3Url}${randomWorkUrl}` },
+                        { text: 'EPUB', url: `${ao3Url}${downloadLink}` }
+                    ]
+                ]
             }
-
-            bot.editMessageText(`Ищу случайный абзац ${i + 1} раз`, { chat_id: chatId, message_id: techMsgId });
-            i++;
-        } while (randomParagraphText === '' && i < 5)
-
-        bot.editMessageText('Все нашел!', { chat_id: chatId, message_id: techMsgId });
-
-        const text = makeWorkAnswer(title, fandom, summary);
-
-        bot.sendMessage(
-            chatId,
-            text.join('\n\n'),
-            {
-                parse_mode: 'HTML',
-                reply_markup: {
-                    inline_keyboard: [
-                        [
-                            { text: 'Работа на AO3', url: `${ao3Url}${randomWorkUrl}` },
-                            { text: 'EPUB', url: `${ao3Url}${downloadLink}` }
-                        ]
-                    ]
+        })
+        .then(() => {
+            console.log(randomWorkUrl, downloadLink)
+            return bot.sendMessage(
+                chatId,
+                `<b>Случайный параграф</b>\n${randomParagraphText}`,
+                {
+                    parse_mode: 'HTML',
                 }
-            })
-            .then(() => {
-                console.log(randomWorkUrl, downloadLink)
-                return bot.sendMessage(
-                    chatId,
-                    `<b>Случайный параграф</b>\n${randomParagraphText}`,
-                    {
-                        parse_mode: 'HTML',
-                    }
-                );
-            });
+            );
+        });
+};
 
-        if (process.memoryUsage().heapUsed > 200000000) {
-            global.gc();
-        }
+const picFunction = async (chatId) => {
+    const queryAttrs = {
+        'work_search%5Bwords_to%5D': 100
+    };
 
-    } catch (error) {
-        showError(bot, chatId, error);
+    if (additionalTag) {
+        queryAttrs['work_search%5Bother_tag_names%5D'] = additionalTag;
     }
-});
 
-bot.onText(/\/pic/, async (msg) => {
-    const chatId = msg.chat.id;
-    console.log(`Сделан запрос pic от чат айди ${chatId}`);
+    const techMsg = await bot.sendMessage(chatId, 'Открываю все работы')
+    const techMsgId = techMsg.message_id;
 
-    try {
-        const queryAttrs = {
-            'work_search%5Bwords_to%5D': 100
-        };
+    const worksUrl = makeWorksUrl(seasonTag);
 
-        if (additionalTag) {
-            queryAttrs['work_search%5Bother_tag_names%5D'] = additionalTag;
-        }
+    const { dom, randomWorkUrl } = await searchWorkPage(bot, chatId, worksUrl, techMsgId, queryAttrs);
+    const { fandom, title, downloadLink, summary } = await getWorkData(dom);
 
-        const techMsg = await bot.sendMessage(chatId, 'Открываю все работы')
-        const techMsgId = techMsg.message_id;
+    //если картинка очень большая - не грузить, давать ссылку
+    const mediaElements = dom.querySelectorAll('#chapters .userstuff img, #chapters .userstuff iframe');
+    const images = [];
+    const otherLinks = [];
 
-        const worksUrl = makeWorksUrl(seasonTag);
-
-        const { dom, randomWorkUrl } = await searchWorkPage(bot, chatId, worksUrl, techMsgId, queryAttrs);
-        const { fandom, title, downloadLink, summary } = await getWorkData(dom);
-
-        //если картинка очень большая - не грузить, давать ссылку
-        const mediaElements = dom.querySelectorAll('#chapters .userstuff img, #chapters .userstuff iframe');
-        const images = [];
-        const otherLinks = [];
-
-        if (mediaElements.length > 0) {
-            mediaElements.forEach(item => {
-                if (item.tagName === 'IMG') {
-                    images.push({
-                        type: 'photo',
-                        media: item.getAttribute('src')
-                    })
-                } else {
-                    otherLinks.push(item.getAttribute('src'));
-                }
-            })
-        }
-
-        const media = array_chunks(images, 10);
-
-        const text = makeWorkAnswer(title, fandom, summary);
-
-        bot.editMessageText('Все нашел!', { chat_id: chatId, message_id: techMsgId });
-        console.log(`Для чат айди ${chatId} загружена работа ${randomWorkUrl}`);
-
-        bot.sendMessage(
-            chatId,
-            text.join('\n\n'),
-            {
-                parse_mode: 'HTML',
-                reply_markup: {
-                    inline_keyboard: [
-                        [
-                            { text: 'Работа на AO3', url: `${ao3Url}${randomWorkUrl}` },
-                        ]
-                    ]
-                }
-            })
-            .then(() => {
-                if (otherLinks.length) {
-                    otherLinks.forEach(link => {
-                        return bot.sendMessage(chatId, `Я нашел видео, посмотрите его по ссылке:\n${link}`);
-                    })
-                }
-                media.forEach(img => {
-                    return bot.sendMediaGroup(chatId, img);
+    if (mediaElements.length > 0) {
+        mediaElements.forEach(item => {
+            if (item.tagName === 'IMG') {
+                images.push({
+                    type: 'photo',
+                    media: item.getAttribute('src')
                 })
-            });
-
-        if (process.memoryUsage().heapUsed > 200000000) {
-            global.gc();
-        }
-    } catch (error) {
-        showError(bot, chatId, error);
+            } else {
+                otherLinks.push(item.getAttribute('src'));
+            }
+        })
     }
-});
+
+    const media = array_chunks(images, 10);
+
+    const text = makeWorkAnswer(title, fandom, summary);
+
+    bot.editMessageText('Все нашел!', { chat_id: chatId, message_id: techMsgId });
+    console.log(`Для чат айди ${chatId} загружена работа ${randomWorkUrl}`);
+
+    bot.sendMessage(
+        chatId,
+        text.join('\n\n'),
+        {
+            parse_mode: 'HTML',
+            reply_markup: {
+                inline_keyboard: [
+                    [
+                        { text: 'Работа на AO3', url: `${ao3Url}${randomWorkUrl}` },
+                    ]
+                ]
+            }
+        })
+        .then(() => {
+            if (otherLinks.length) {
+                otherLinks.forEach(link => {
+                    return bot.sendMessage(chatId, `Я нашел видео, посмотрите его по ссылке:\n${link}`);
+                })
+            }
+            media.forEach(img => {
+                return bot.sendMediaGroup(chatId, img);
+            })
+        });
+};
 
 bot.onText(/\/collection/, async (msg) => {
     const chatId = msg.chat.id;
@@ -273,6 +239,28 @@ app.post(`/callback`, async (_req, res) => {
     // console.log(_req.body);
     // bot.processUpdate(_req.body);
     console.log(_req.body);
+
+    const msgText = _req.body.message.text;
+    const chatId = _req.body.message.chat.id;
+    const date = _req.body.message.date;
+
+    console.log(`Сделан запрос ${msgText} от чат айди ${chatId}`);
+    try {
+        if (/\/set/.test(msgText)) {
+            await setFunction(chatId);
+        }
+
+        if (/\/cit/.test(msgText)) {
+            await citFunction(chatId);
+        }
+
+        if (/\/pic/.test(msgText)) {
+            await picFunction(chatId);
+        }
+    } catch (error) {
+        showError(bot, chatId, error);
+    }
+
     res.sendStatus(200);
 });
 
