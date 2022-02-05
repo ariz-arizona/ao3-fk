@@ -13,6 +13,7 @@ const CURRENT_HOST = 'https://ao3-fk-ariz-arizona.vercel.app';
 const app = express();
 
 const bot = new TelegramBot(BOT_TOKEN);
+bot.setWebHook(url, { allowed_updates: ["message", "edited_message", "callback_query", "inline_query"] });
 
 //todo продолжать работу при ошибке парсинга
 //todo ссылка на скачивание вместо урл страницы ??
@@ -263,8 +264,8 @@ bot.on('polling_error', (error) => {
 app.use(express.json());
 
 app.get('/', async (_req, res) => {
-    const url = `${CURRENT_HOST}/callback`;
-    await bot.setWebHook(url, { allowed_updates: ["message", "edited_message", "callback_query", "inline_query"] });
+    // const url = `${CURRENT_HOST}/callback`;
+    // await bot.setWebHook(url, { allowed_updates: ["message", "edited_message", "callback_query", "inline_query"] });
     res.send(`listening on ${CURRENT_HOST}`)
 });
 
