@@ -260,7 +260,7 @@ app.use(express.json());
 
 app.get('/', async (_req, res) => {
     const url = `${CURRENT_HOST}/callback`;
-    await bot.setWebHook(url);
+    await bot.setWebHook(url, { allowed_updates: ["message", "callback_query", "inline_query"] });
     res.send(`listening on ${CURRENT_HOST}`)
 });
 
