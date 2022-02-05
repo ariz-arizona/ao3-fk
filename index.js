@@ -266,6 +266,7 @@ app.get('/', async (_req, res) => {
 });
 
 app.post('/callback', async (_req, res) => {
+    console.log(_req.body);
     await bot.processUpdate(_req.body);
     res.sendStatus(200);
 });
