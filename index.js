@@ -259,7 +259,7 @@ bot.on('polling_error', (error) => {
 app.use(express.json());
 
 app.get('/', async (_req, res) => {
-    const url = `${CURRENT_HOST}/callback`;
+    const url = `${CURRENT_HOST}`;
     await bot.setWebHook(url);
     res.send(`listening on ${CURRENT_HOST}`)
 });
