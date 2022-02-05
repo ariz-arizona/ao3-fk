@@ -1,5 +1,6 @@
 require('dotenv').config()
 const TelegramBot = require('node-telegram-bot-api');
+const express = require('express');
 
 const { getRandomInt, array_chunks } = require('./helpers');
 const { searchWorkPage, getWorkData, makeWorkAnswer, showError, makeWorksUrl } = require('./func');
@@ -255,11 +256,11 @@ bot.on('polling_error', (error) => {
     console.log(error);
 });
 
-app.use();
+// app.use();
 
 app.get('/', async (_req, res) => {
     const url = `${CURRENT_HOST}/callback`;
-    await bot.setWebhook(url);
+    await bot.setWebHook(url);
     res.send(`listening on ${CURRENT_HOST}`)
 });
 
