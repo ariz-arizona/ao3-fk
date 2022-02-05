@@ -71,7 +71,8 @@ bot.onText(/\/cit/, async (msg) => {
         }
         console.log(queryAttrs);
 
-        const techMsg = await bot.sendMessage(chatId, 'Открываю все работы')
+        const techMsg = await bot.sendMessage(chatId, 'Открываю все работы');
+        bot.processUpdate()
         const techMsgId = techMsg.message_id;
         console.log(techMsgId);
 
@@ -269,7 +270,7 @@ app.get('/', async (_req, res) => {
 });
 
 app.post('/callback', async (_req, res) => {
-    console.log(_req.body);
+    // console.log(_req.body);
     await bot.processUpdate(_req.body);
     res.sendStatus(200);
 });
