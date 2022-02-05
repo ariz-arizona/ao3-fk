@@ -8,7 +8,7 @@ const { fkTagYears, fkTag, winterFkTag, ao3Url } = require('./constants');
 const { BOT_TOKEN } = process.env;
 
 const bot = new TelegramBot(BOT_TOKEN);
-bot.setWebHook('https://ao3-fk-ariz-arizona.vercel.app/api.js');
+bot.setWebHook('https://ao3-fk-ariz-arizona.vercel.app');
 
 //todo продолжать работу при ошибке парсинга
 //todo ссылка на скачивание вместо урл страницы ??
