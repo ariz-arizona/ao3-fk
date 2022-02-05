@@ -72,8 +72,8 @@ bot.onText(/\/cit/, async (msg) => {
         console.log(queryAttrs);
 
         const techMsg = await bot.sendMessage(chatId, 'Открываю все работы');
+        console.log(techMsg);
         const techMsgId = techMsg.message_id;
-        console.log(techMsgId);
 
         const worksUrl = makeWorksUrl(seasonTag);
 
