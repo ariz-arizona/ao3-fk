@@ -22,7 +22,6 @@ let additionalTag = fkTagYears['w2022'];
 let seasonTag = winterFkTag;
 
 const setFunction = async (chatId) => {
-
     await bot.sendMessage(
         chatId,
         'Выберите битву:',
@@ -238,7 +237,7 @@ app.get('/', async (_req, res) => {
 app.post(`/callback`, async (_req, res) => {
     // console.log(_req.body);
     // bot.processUpdate(_req.body);
-    console.log(_req.body);
+    // console.log(_req.body);
 
     const msgText = _req.body.message.text;
     const chatId = _req.body.message.chat.id;
