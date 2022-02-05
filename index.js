@@ -207,6 +207,16 @@ bot.onText(/\/pic/, async (msg) => {
     }
 });
 
+bot / onText(/\/collection/, async (msg) => {
+    const chatId = msg.chat.id;
+    console.log(`Сделан запрос collection от чат айди ${chatId}`);
+
+    try {
+    } catch (error) {
+        showError(bot, chatId, error);
+    }
+})
+
 bot.on('callback_query', function onCallbackQuery(callbackQuery) {
     const action = callbackQuery.data;
     const msg = callbackQuery.message;
