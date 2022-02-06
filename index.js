@@ -6,9 +6,8 @@ const { getRandomInt, array_chunks } = require('./helpers');
 const { searchWorkPage, getWorkData, makeWorkAnswer, showError, makeWorksUrl } = require('./func');
 const { fkTagYears, fkTag, winterFkTag, ao3Url } = require('./constants');
 
-const { BOT_TOKEN } = process.env;
+const { BOT_TOKEN, CURRENT_HOST = 'https://ao3-fk-ariz-arizona.vercel.app' } = process.env;
 const APP_PORT = 443;
-const CURRENT_HOST = 'https://ao3-fk-ariz-arizona.vercel.app';
 
 const app = express();
 
