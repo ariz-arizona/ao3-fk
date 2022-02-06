@@ -199,6 +199,7 @@ bot.onText(/\/collection/, async (msg) => {
 })
 
 function onCallbackQuery(callbackQuery) {
+    console.log(callbackQuery)
     const action = callbackQuery.data;
     const msg = callbackQuery.message;
     const chatId = msg.chat.id;
