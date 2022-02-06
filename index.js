@@ -212,9 +212,13 @@ function onCallbackQuery(callbackQuery) {
             seasonTag = winterFkTag;
         }
 
+        console.log(additionalTag, seasonTag)
+
         bot.sendMessage(chatId, 'Погадаем?', {
             reply_markup: {
-                keyboard: [['/cit', '/pic']],
+                keyboard: [
+                    ['/cit', '/pic']
+                ],
                 resize_keyboard: true,
                 one_time_keyboard: false
             }
