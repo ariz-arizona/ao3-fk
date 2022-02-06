@@ -209,7 +209,7 @@ const collectionFunction = async (chatId) => {
     return true;
 }
 
-function onCallbackQuery(callbackQuery) {
+const onCallbackQuery = async (callbackQuery) => {
     const action = callbackQuery.data;
     const msg = callbackQuery.message;
     const chatId = msg.chat.id;
