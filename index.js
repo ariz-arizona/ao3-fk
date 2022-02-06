@@ -242,28 +242,29 @@ app.get('/', async (_req, res) => {
 
 app.post(`/callback`, async (_req, res) => {
     // console.log(_req.body);
-    // bot.processUpdate(_req.body);
-    console.log(_req.body);
 
     const msgText = _req.body.message.text;
     const chatId = _req.body.message.chat.id;
     const date = _req.body.message.date;
+    if (_req.body.message) {
+        console.log(`Сделан запрос ${msgText} от чат айди ${chatId}`);
+        try {
+            if (/\/set/.test(msgText)) {
+                await setFunction(chatId);
+            }
 
-    console.log(`Сделан запрос ${msgText} от чат айди ${chatId}`);
-    try {
-        if (/\/set/.test(msgText)) {
-            await setFunction(chatId);
-        }
+            if (/\/cit/.test(msgText)) {
+                await citFunction(chatId);
+            }
 
-        if (/\/cit/.test(msgText)) {
-            await citFunction(chatId);
+            if (/\/pic/.test(msgText)) {
+                await picFunction(chatId);
+            }
+        } catch (error) {
+            showError(bot, chatId, error);
         }
-
-        if (/\/pic/.test(msgText)) {
-            await picFunction(chatId);
-        }
-    } catch (error) {
-        showError(bot, chatId, error);
+    } else {
+        bot.processUpdate(_req.body);
     }
 
     res.sendStatus(200);
