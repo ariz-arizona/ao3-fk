@@ -243,10 +243,10 @@ app.get('/', async (_req, res) => {
 app.post(`/callback`, async (_req, res) => {
     // console.log(_req.body);
 
-    const msgText = _req.body.message.text;
-    const chatId = _req.body.message.chat.id;
-    const date = _req.body.message.date;
     if (_req.body.message) {
+        const msgText = _req.body.message.text;
+        const chatId = _req.body.message.chat.id;
+        const date = _req.body.message.date;
         console.log(`Сделан запрос ${msgText} от чат айди ${chatId}`);
         try {
             if (/\/set/.test(msgText)) {
