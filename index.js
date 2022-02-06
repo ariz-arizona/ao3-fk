@@ -198,7 +198,7 @@ bot.onText(/\/collection/, async (msg) => {
     }
 })
 
-bot.on('callback_query', function onCallbackQuery(callbackQuery) {
+function onCallbackQuery(callbackQuery) {
     const action = callbackQuery.data;
     const msg = callbackQuery.message;
     const chatId = msg.chat.id;
@@ -222,7 +222,9 @@ bot.on('callback_query', function onCallbackQuery(callbackQuery) {
     }
 
     return bot.answerCallbackQuery(callbackQuery.id);
-});
+}
+
+bot.on('callback_query', onCallbackQuery);
 
 bot.on('error', (error) => {
     console.log(error.code);
