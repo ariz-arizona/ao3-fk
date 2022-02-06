@@ -13,8 +13,10 @@ const fkTagYears = {
 const fkTagCollections = {
     2021: 'FandomKombat2021',
     2020: 'FandomKombat2020',
+    w2021: 'WTFKombat2021',
+    w2022: 'WTFKombat2022'
 }
 
 const worksUrl = `${ao3Url}/tags/${fkTag}/works`;
 
-module.exports = { worksUrl, ao3Url, fkTag, winterFkTag, fkTagYears }
+module.exports = { worksUrl, ao3Url, fkTag, winterFkTag, fkTagYears, fkTagCollections }

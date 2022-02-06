@@ -4,7 +4,7 @@ const express = require('express');
 
 const { getRandomInt, array_chunks } = require('./helpers');
 const { searchWorkPage, getWorkData, makeWorkAnswer, showError, makeWorksUrl } = require('./func');
-const { fkTagYears, fkTag, winterFkTag, ao3Url } = require('./constants');
+const { fkTagYears, fkTag, winterFkTag, ao3Url, fkTagCollections } = require('./constants');
 
 const { BOT_TOKEN, CURRENT_HOST = 'https://ao3-fk-ariz-arizona.vercel.app' } = process.env;
 const APP_PORT = 443;
@@ -133,7 +133,7 @@ const picFunction = async (chatId) => {
     const worksUrl = makeWorksUrl(seasonTag);
 
     const { dom, randomWorkUrl } = await searchWorkPage(bot, chatId, worksUrl, techMsgId, queryAttrs);
-    const { fandom, title, downloadLink, summary } = await getWorkData(dom);
+    const { fandom, title, summary } = await getWorkData(dom);
 
     //если картинка очень большая - не грузить, давать ссылку
     const mediaElements = dom.querySelectorAll('#chapters .userstuff img, #chapters .userstuff iframe');
@@ -187,15 +187,27 @@ const picFunction = async (chatId) => {
     return true;
 };
 
-bot.onText(/\/collection/, async (msg) => {
-    const chatId = msg.chat.id;
-    console.log(`Сделан запрос collection от чат айди ${chatId}`);
-
-    try {
-    } catch (error) {
-        showError(bot, chatId, error);
-    }
-})
+const collectionFunction = async (chatId) => {
+    await bot.sendMessage(
+        chatId,
+        'Выберите битву:',
+        {
+            reply_markup: {
+                inline_keyboard: [
+                    [
+                        { text: 'FandomKombat2021', callback_data: 'collection_2021' },
+                        { text: 'FandomKombat2020', callback_data: 'collection_2020' },
+                    ],
+                    [
+                        { text: 'WTFKombat2021', callback_data: 'collection_w2021' },
+                        { text: 'WTFKombat2022', callback_data: 'collection_w2022' },
+                    ],
+                ]
+            }
+        }
+    );
+    return true;
+}
 
 function onCallbackQuery(callbackQuery) {
     const action = callbackQuery.data;
@@ -224,9 +236,54 @@ function onCallbackQuery(callbackQuery) {
         })
     }
 
+    if (action.indexOf('collection_') === 0) {
+        const vars = action.replace('collection_', '').split('_');
+        const collection = fkTagCollections[vars[0]];
+
+        const url = `${ao3Url}/collections/${collection}/collections`;
+
+        let content;
+        let dom;
+        content = await loadPage(url);
+        dom = HTMLParser.parse(content);
+
+        if (!dom.querySelector('.collection .stats dd:nth-child(4)')) {
+            throw new Error('notfound');
+        }
+
+        const domLinks = dom.querySelector('.collection .stats dd:nth-child(4)');
+        const links = [];
+        domLinks.forEach(el => {
+            const link = {};
+            link.name = el.closest('.collection').querySelector('.heading > a').textContent;
+            link.href = el.querySelector('a').getAttribute('href');
+            links.push(link);
+        });
+
+        linksChunks = array_chunks(links, 3);
+        const keyboard = [];
+        linksChunks.map(el => {
+            const row = [];
+            el.map(link => {
+                row.push({ text: link.name, callback_data: `link_${link.href}` },)
+            })
+            keyboard.push(row);
+        });
+
+        bot.sendMessage(chatId, 'Заглядываю в коллекции', {
+            reply_markup: {
+                inline_keyboard: keyboard
+            }
+        })
+    }
+
     return bot.answerCallbackQuery(callbackQuery.id);
 }
 
+bot.onText(/\/set/, setFunction);
+bot.onText(/\/pic/, picFunction);
+bot.onText(/\/cit/, citFunction);;
+bot.onText(/\/collection/, collectionFunction)
 bot.on('callback_query', onCallbackQuery);
 
 bot.on('error', (error) => {
@@ -263,6 +320,10 @@ app.post(`/callback`, async (_req, res) => {
             }
 
             if (/\/pic/.test(msgText)) {
+                await picFunction(chatId);
+            }
+
+            if (/\/collection/.test(msgText)) {
                 await picFunction(chatId);
             }
         } catch (error) {
