@@ -89,7 +89,7 @@ const citFunction = async (chatId) => {
 
     const text = makeWorkAnswer(title, fandom, summary);
 
-    bot.sendMessage(
+    await bot.sendMessage(
         chatId,
         text.join('\n\n'),
         {
@@ -113,6 +113,8 @@ const citFunction = async (chatId) => {
                 }
             );
         });
+
+    return true;
 };
 
 const picFunction = async (chatId) => {
@@ -157,7 +159,7 @@ const picFunction = async (chatId) => {
     bot.editMessageText('Все нашел!', { chat_id: chatId, message_id: techMsgId });
     console.log(`Для чат айди ${chatId} загружена работа ${randomWorkUrl}`);
 
-    bot.sendMessage(
+    await bot.sendMessage(
         chatId,
         text.join('\n\n'),
         {
@@ -180,6 +182,8 @@ const picFunction = async (chatId) => {
                 return bot.sendMediaGroup(chatId, img);
             })
         });
+        
+    return true;
 };
 
 bot.onText(/\/collection/, async (msg) => {
