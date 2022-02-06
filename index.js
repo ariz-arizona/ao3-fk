@@ -211,6 +211,8 @@ function onCallbackQuery(callbackQuery) {
 
         if (vars[1] === 'w') {
             seasonTag = winterFkTag;
+        } else {
+            seasonTag = fkTag;
         }
 
         console.log(additionalTag, seasonTag)
