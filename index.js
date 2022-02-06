@@ -2,7 +2,7 @@ require('dotenv').config()
 const TelegramBot = require('node-telegram-bot-api');
 const express = require('express');
 
-const { getRandomInt, array_chunks } = require('./helpers');
+const { getRandomInt, array_chunks, loadPage } = require('./helpers');
 const { searchWorkPage, getWorkData, makeWorkAnswer, showError, makeWorksUrl } = require('./func');
 const { fkTagYears, fkTag, winterFkTag, ao3Url, fkTagCollections } = require('./constants');
 
@@ -214,6 +214,9 @@ const onCallbackQuery = async (callbackQuery) => {
     const msg = callbackQuery.message;
     const chatId = msg.chat.id;
     // message_id: msg.message_id,
+    
+    let content;
+    let dom;
 
     if (action.indexOf('set_') === 0) {
         const vars = action.replace('set_', '').split('_');
@@ -242,8 +245,6 @@ const onCallbackQuery = async (callbackQuery) => {
 
         const url = `${ao3Url}/collections/${collection}/collections`;
 
-        let content;
-        let dom;
         content = await loadPage(url);
         dom = HTMLParser.parse(content);
 
@@ -275,6 +276,11 @@ const onCallbackQuery = async (callbackQuery) => {
                 inline_keyboard: keyboard
             }
         })
+    }
+
+    if (action.indexOf('link_') === 0) {
+        const vars = action.replace('collection_', '').split('_');
+        const url = `${ao3Url}/collections/${collection}/collections`;
     }
 
     return bot.answerCallbackQuery(callbackQuery.id);
