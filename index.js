@@ -255,7 +255,7 @@ const onCallbackQuery = async (callbackQuery) => {
         content = await loadPage(url);
         dom = HTMLParser.parse(content);
 
-        const pagesCount = dom.querySelector('.pagination li:nth-last-child(2)').textContent;
+        const pagesCount = dom.querySelector('.pagination li:nth-last-child(2)') ? dom.querySelector('.pagination li:nth-last-child(2)').textContent : 1;
         const randomPage = getRandomInt(1, pagesCount);
 
         queryAttrs = {
@@ -305,7 +305,11 @@ const onCallbackQuery = async (callbackQuery) => {
                 }
                 if (media.length) {
                     media.forEach(img => {
-                        return bot.sendMediaGroup(chatId, img);
+                        try {
+                            bot.sendMediaGroup(chatId, img);
+                        } catch (error) {
+                            bot.sendMessage(chatId, img.join('\n'))
+                        }
                     })
                 }
                 return bot.sendMessage(
