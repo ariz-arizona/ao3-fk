@@ -1,12 +1,13 @@
 require('dotenv').config()
 const TelegramBot = require('node-telegram-bot-api');
 const express = require('express');
+const HTMLParser = require('node-html-parser');
 
-const { getRandomInt, array_chunks, loadPage } = require('./helpers');
+const { getRandomInt, array_chunks, loadPage, makeQueryString } = require('./helpers');
 const { searchWorkPage, getWorkData, makeWorkAnswer, showError, makeWorksUrl } = require('./func');
 const { fkTagYears, fkTag, winterFkTag, ao3Url, fkTagCollections } = require('./constants');
 
-const { BOT_TOKEN, CURRENT_HOST = 'https://ao3-fk-ariz-arizona.vercel.app' } = process.env;
+const { BOT_TOKEN, CURRENT_HOST = 'https://f256-31-135-116-96.ngrok.io' } = process.env;
 const APP_PORT = 443;
 
 const app = express();
@@ -214,7 +215,7 @@ const onCallbackQuery = async (callbackQuery) => {
     const msg = callbackQuery.message;
     const chatId = msg.chat.id;
     // message_id: msg.message_id,
-    
+
     let content;
     let dom;
 
@@ -252,7 +253,7 @@ const onCallbackQuery = async (callbackQuery) => {
             throw new Error('notfound');
         }
 
-        const domLinks = dom.querySelector('.collection .stats dd:nth-child(4)');
+        const domLinks = dom.querySelectorAll('.collection .stats dd:nth-child(4)');
         const links = [];
         domLinks.forEach(el => {
             const link = {};
@@ -279,8 +280,29 @@ const onCallbackQuery = async (callbackQuery) => {
     }
 
     if (action.indexOf('link_') === 0) {
-        const vars = action.replace('collection_', '').split('_');
-        const url = `${ao3Url}/collections/${collection}/collections`;
+        const vars = action.replace('link_', '');
+        const url = `${ao3Url}${vars}`;
+
+        content = await loadPage(url);
+        dom = HTMLParser.parse(content);
+
+        const pagesCount = dom.querySelector('.pagination li:nth-last-child(2)').textContent;
+        const randomPage = getRandomInt(1, pagesCount);
+
+        const queryAttrs = {
+            'page': randomPage
+        };
+
+        content = await loadPage(`${url}${makeQueryString(queryAttrs)}`);
+        dom = HTMLParser.parse(content);
+
+        const allWorks = dom.querySelectorAll('ol.work > li');
+        const randomWorkNumber = getRandomInt(0, allWorks.length - 1);
+        const randomWork = allWorks[randomWorkNumber];
+
+        const href = randomWork.querySelector('.heading > a').getAttribute('href');
+
+        console.log(href);
     }
 
     return bot.answerCallbackQuery(callbackQuery.id);
