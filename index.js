@@ -4,7 +4,7 @@ const express = require('express');
 const HTMLParser = require('node-html-parser');
 
 const { getRandomInt, array_chunks, loadPage, makeQueryString } = require('./helpers');
-const { searchWorkPage, getWorkData, makeWorkAnswer, showError, makeWorksUrl } = require('./func');
+const { searchWorkPage, getWorkData, makeWorkAnswer, showError, makeWorksUrl, getWorkImages, getRandomParagraph } = require('./func');
 const { fkTagYears, fkTag, winterFkTag, ao3Url, fkTagCollections } = require('./constants');
 
 const { BOT_TOKEN, CURRENT_HOST = 'https://f256-31-135-116-96.ngrok.io' } = process.env;
@@ -68,24 +68,9 @@ const citFunction = async (chatId) => {
     const { dom, randomWorkUrl } = await searchWorkPage(bot, chatId, worksUrl, techMsgId, queryAttrs);
     const { fandom, title, downloadLink, summary } = await getWorkData(dom);
 
-    const paragraphs = dom.querySelectorAll('#chapters .userstuff p');
-
     bot.editMessageText('Ищу случайный абзац', { chat_id: chatId, message_id: techMsgId });
 
-    let randomParagraph, randomParagraphText;
-    let i = 0;
-
-    do {
-        randomParagraph = getRandomInt(0, paragraphs.length - 1);
-        randomParagraphText = paragraphs[randomParagraph].textContent.trim().substring(0, 2048);
-
-        if (randomParagraphText === '') {
-            paragraphs.splice(randomParagraph, 1)
-        }
-
-        bot.editMessageText(`Ищу случайный абзац ${i + 1} раз`, { chat_id: chatId, message_id: techMsgId });
-        i++;
-    } while (randomParagraphText === '' && i < 5)
+    const randomParagraphText = getRandomParagraph(dom);
 
     bot.editMessageText('Все нашел!', { chat_id: chatId, message_id: techMsgId });
 
@@ -136,25 +121,7 @@ const picFunction = async (chatId) => {
     const { dom, randomWorkUrl } = await searchWorkPage(bot, chatId, worksUrl, techMsgId, queryAttrs);
     const { fandom, title, summary } = await getWorkData(dom);
 
-    //если картинка очень большая - не грузить, давать ссылку
-    const mediaElements = dom.querySelectorAll('#chapters .userstuff img, #chapters .userstuff iframe');
-    const images = [];
-    const otherLinks = [];
-
-    if (mediaElements.length > 0) {
-        mediaElements.forEach(item => {
-            if (item.tagName === 'IMG') {
-                images.push({
-                    type: 'photo',
-                    media: item.getAttribute('src')
-                })
-            } else {
-                otherLinks.push(item.getAttribute('src'));
-            }
-        })
-    }
-
-    const media = array_chunks(images, 10);
+    const { media, otherLinks } = getWorkImages(dom);
 
     const text = makeWorkAnswer(title, fandom, summary);
 
@@ -314,6 +281,9 @@ const onCallbackQuery = async (callbackQuery) => {
         const { fandom, title, downloadLink, summary } = await getWorkData(dom);
         const text = makeWorkAnswer(title, fandom, summary);
 
+        const randomParagraphText = getRandomParagraph(dom);
+        const { media, otherLinks } = getWorkImages(dom);
+
         await bot.sendMessage(
             chatId,
             text.join('\n\n'),
@@ -327,7 +297,25 @@ const onCallbackQuery = async (callbackQuery) => {
                         ]
                     ]
                 }
-            })
+            }).then(() => {
+                if (otherLinks.length) {
+                    otherLinks.forEach(link => {
+                        return bot.sendMessage(chatId, `Я нашел видео, посмотрите его по ссылке:\n${link}`);
+                    })
+                }
+                if (media.length) {
+                    media.forEach(img => {
+                        return bot.sendMediaGroup(chatId, img);
+                    })
+                }
+                return bot.sendMessage(
+                    chatId,
+                    `<b>Случайный параграф</b>\n${randomParagraphText}`,
+                    {
+                        parse_mode: 'HTML',
+                    }
+                );
+            });
     }
 
     return bot.answerCallbackQuery(callbackQuery.id);
