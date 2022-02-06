@@ -58,7 +58,6 @@ const citFunction = async (chatId) => {
     if (additionalTag) {
         queryAttrs['work_search%5Bother_tag_names%5D'] = additionalTag;
     }
-    console.log(additionalTag, seasonTag)
 
     const techMsg = await bot.sendMessage(chatId, 'Открываю все работы');
     const techMsgId = techMsg.message_id;
@@ -213,8 +212,6 @@ function onCallbackQuery(callbackQuery) {
         } else {
             seasonTag = fkTag;
         }
-
-        console.log(additionalTag, seasonTag)
 
         bot.sendMessage(chatId, 'Погадаем?', {
             reply_markup: {
