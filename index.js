@@ -263,9 +263,10 @@ app.post(`/callback`, async (_req, res) => {
         } catch (error) {
             showError(bot, chatId, error);
         }
-    } else {
-        bot.processUpdate(_req.body);
+    } else if (_req.body.callback_query) {
+        onCallbackQuery(_req.body.callback_query)
     }
+    // bot.processUpdate(_req.body);
 
     res.sendStatus(200);
 });
