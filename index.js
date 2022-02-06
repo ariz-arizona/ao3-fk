@@ -324,7 +324,7 @@ app.post(`/callback`, async (_req, res) => {
             }
 
             if (/\/collection/.test(msgText)) {
-                await picFunction(chatId);
+                await collectionFunction(chatId);
             }
         } catch (error) {
             showError(bot, chatId, error);
