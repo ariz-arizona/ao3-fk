@@ -375,7 +375,7 @@ app.post(`/callback`, async (_req, res) => {
             showError(bot, chatId, error);
         }
     } else if (_req.body.callback_query) {
-        onCallbackQuery(_req.body.callback_query)
+        await onCallbackQuery(_req.body.callback_query)
     }
     // bot.processUpdate(_req.body);
 
