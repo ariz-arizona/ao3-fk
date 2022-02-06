@@ -280,6 +280,8 @@ const onCallbackQuery = async (callbackQuery) => {
     }
 
     if (action.indexOf('link_') === 0) {
+        let queryAttrs;
+
         const vars = action.replace('link_', '');
         const url = `${ao3Url}${vars}`;
 
@@ -289,7 +291,7 @@ const onCallbackQuery = async (callbackQuery) => {
         const pagesCount = dom.querySelector('.pagination li:nth-last-child(2)').textContent;
         const randomPage = getRandomInt(1, pagesCount);
 
-        const queryAttrs = {
+        queryAttrs = {
             'page': randomPage
         };
 
@@ -302,7 +304,30 @@ const onCallbackQuery = async (callbackQuery) => {
 
         const href = randomWork.querySelector('.heading > a').getAttribute('href');
 
-        console.log(href);
+        queryAttrs = {
+            'view_full_work': 'true',
+            'view_adult': 'true'
+        };
+        content = await loadPage(`${ao3Url}${href}${makeQueryString(queryAttrs)}`);
+        dom = HTMLParser.parse(content);
+
+        const { fandom, title, downloadLink, summary } = await getWorkData(dom);
+        const text = makeWorkAnswer(title, fandom, summary);
+
+        await bot.sendMessage(
+            chatId,
+            text.join('\n\n'),
+            {
+                parse_mode: 'HTML',
+                reply_markup: {
+                    inline_keyboard: [
+                        [
+                            { text: 'Работа на AO3', url: `${ao3Url}${href}` },
+                            { text: 'EPUB', url: `${ao3Url}${downloadLink}` }
+                        ]
+                    ]
+                }
+            })
     }
 
     return bot.answerCallbackQuery(callbackQuery.id);
