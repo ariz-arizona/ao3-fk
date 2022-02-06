@@ -47,6 +47,8 @@ const setFunction = async (chatId) => {
             }
         }
     );
+
+    return true;
 };
 
 const citFunction = async (chatId) => {
@@ -182,7 +184,7 @@ const picFunction = async (chatId) => {
                 return bot.sendMediaGroup(chatId, img);
             })
         });
-        
+
     return true;
 };
 
@@ -241,7 +243,7 @@ app.get('/', async (_req, res) => {
 app.post(`/callback`, async (_req, res) => {
     // console.log(_req.body);
     // bot.processUpdate(_req.body);
-    // console.log(_req.body);
+    console.log(_req.body);
 
     const msgText = _req.body.message.text;
     const chatId = _req.body.message.chat.id;
