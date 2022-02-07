@@ -1,10 +1,12 @@
 const HTMLParser = require('node-html-parser');
 
-const { ao3Url } = require('./constants');
+const { ao3Url } = require('../constants');
 const { getRandomInt, makeQueryString, getSearchParametres, loadPage, array_chunks } = require('./helpers');
 
 //todo глобальные переменные?
-const searchWorkPage = async (bot, chatId, worksUrl, techMsgId, queryAttrs) => {
+const searchWorkPage = async (chatId, worksUrl, techMsgId, queryAttrs) => {
+    const bot = global.bot;
+
     console.log(`search work page ${chatId}`)
     let pageQuery = {};
     let content;
