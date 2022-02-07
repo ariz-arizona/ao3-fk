@@ -4,6 +4,7 @@ const express = require('express');
 
 const { fkTagYears, winterFkTag } = require('./constants');
 const { set, cit, pic, collection, onCallbackQuery } = require('./functions/main');
+const { showError } = require('./functions/func');
 
 const { BOT_TOKEN, CURRENT_HOST } = process.env;
 //todo port в переменные среды
@@ -47,25 +48,30 @@ app.post(`/callback`, async (_req, res) => {
         const msgText = _req.body.message.text;
         const chatId = _req.body.message.chat.id;
         // const date = _req.body.message.date;
+
+        if (!global.chatId || global.chatId !== chatId) {
+            global.chatId = chatId;
+        }
+
         console.log(`Сделан запрос ${msgText} от чат айди ${chatId}`);
         try {
             if (/\/set/.test(msgText)) {
-                await set(chatId);
+                await set();
             }
 
             if (/\/cit/.test(msgText)) {
-                await cit(chatId);
+                await cit();
             }
 
             if (/\/pic/.test(msgText)) {
-                await pic(chatId);
+                await pic();
             }
 
             if (/\/collection/.test(msgText)) {
-                await collection(chatId);
+                await collection();
             }
         } catch (error) {
-            showError(bot, chatId, error);
+            showError(error);
         }
     } else if (_req.body.callback_query) {
         await onCallbackQuery(_req.body.callback_query);

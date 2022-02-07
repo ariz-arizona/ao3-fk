@@ -106,7 +106,10 @@ const getRandomParagraph = dom => {
     return randomParagraphText;
 }
 
-const showError = (bot, chatId, error) => {
+const showError = (error) => {
+    const bot = global.bot;
+    const chatId = global.chatId;
+
     let msg;
     switch (error.message) {
         case 'notfound':

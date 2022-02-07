@@ -5,8 +5,10 @@ const { getRandomInt, array_chunks, loadPage, makeQueryString } = require('./hel
 const { searchWorkPage, getWorkData, makeWorkAnswer, makeWorksUrl, getWorkImages, getRandomParagraph } = require('./func');
 const { fkTagYears, fkTag, winterFkTag, ao3Url, fkTagCollections } = require('../constants');
 
-const set = async (chatId) => {
+const set = async () => {
     const bot = global.bot;
+    const chatId = global.chatId;
+
     await bot.sendMessage(
         chatId,
         'Выберите битву:',
@@ -36,8 +38,9 @@ const set = async (chatId) => {
     return true;
 };
 
-const cit = async (chatId) => {
+const cit = async () => {
     const bot = global.bot;
+    const chatId = global.chatId;
 
     const queryAttrs = {
         'work_search%5Bwords_from%5D': 100
@@ -91,8 +94,9 @@ const cit = async (chatId) => {
     return true;
 };
 
-const pic = async (chatId) => {
+const pic = async () => {
     const bot = global.bot;
+    const chatId = global.chatId;
 
     const queryAttrs = {
         'work_search%5Bwords_to%5D': 100
@@ -144,8 +148,9 @@ const pic = async (chatId) => {
     return true;
 };
 
-const collection = async (chatId) => {
+const collection = async () => {
     const bot = global.bot;
+    const chatId = global.chatId;
 
     await bot.sendMessage(
         chatId,
