@@ -4,10 +4,11 @@ const { ao3Url } = require('../constants');
 const { getRandomInt, makeQueryString, getSearchParametres, loadPage, array_chunks } = require('./helpers');
 
 //todo глобальные переменные?
-const searchWorkPage = async (chatId, worksUrl, techMsgId, queryAttrs) => {
-    const bot = global.bot;
+const searchWorkPage = async (worksUrl, queryAttrs) => {
+    // const bot = global.bot;
+    const chatId = global.chatId;
 
-    console.log(`search work page ${chatId}`)
+    // console.log(`search work page ${chatId}`)
     let pageQuery = {};
     let content;
     let dom;
@@ -26,7 +27,7 @@ const searchWorkPage = async (chatId, worksUrl, techMsgId, queryAttrs) => {
     pageQuery = searchParams;
     pageQuery.page = randomPage;
 
-    bot.editMessageText('Выбрал случайную страницу', { chat_id: chatId, message_id: techMsgId });
+    techMsg('Выбрал случайную страницу');
 
     const randomPageUrl = `${worksUrl}${makeQueryString(pageQuery)}`;
 
@@ -37,7 +38,7 @@ const searchWorkPage = async (chatId, worksUrl, techMsgId, queryAttrs) => {
     const randomWork = getRandomInt(0, worksCount);
     const randomWorkUrl = dom.querySelectorAll('.work > li')[randomWork].querySelector('.heading > a').getAttribute('href');
 
-    bot.editMessageText(`Выбрал случайную работу ${randomWorkUrl}`, { chat_id: chatId, message_id: techMsgId });
+    techMsg(`Выбрал случайную работу ${randomWorkUrl}`);
     console.log(`Для чат айди ${chatId} выбрана работа ${randomWorkUrl}`);
 
     content = await loadPage(`${ao3Url}${randomWorkUrl}${makeQueryString({ 'view_full_work': 'true', 'view_adult': 'true' })}`);
@@ -99,7 +100,7 @@ const getRandomParagraph = dom => {
             paragraphs.splice(randomParagraph, 1)
         }
 
-        // bot.editMessageText(`Ищу случайный абзац ${i + 1} раз`, { chat_id: chatId, message_id: techMsgId });
+        techMsg(`Ищу случайный абзац ${i + 1} раз`);
         i++;
     } while (randomParagraphText === '' && i < 5)
 
@@ -125,4 +126,22 @@ const makeWorksUrl = (seasonTag) => {
     return `${ao3Url}/tags/${seasonTag}/works`
 }
 
-module.exports = { searchWorkPage, getWorkData, makeWorkAnswer, getWorkImages, getRandomParagraph, showError, makeWorksUrl }
+const techMsg = async (msg, isNew = false) => {
+    const bot = global.bot;
+    const chatId = global.chatId;
+    const techMsgId = global.techMsgId;
+
+    if (!techMsgId) {
+        isNew = true;
+    }
+
+    if (isNew) {
+        const techMsg = await bot.sendMessage(chatId, 'Открываю все работы');
+        const techMsgId = techMsg.message_id;
+        global.techMsgId = techMsgId;
+    } else {
+        bot.editMessageText(msg, { chat_id: chatId, message_id: techMsgId });
+    }
+}
+
+module.exports = { searchWorkPage, getWorkData, makeWorkAnswer, getWorkImages, getRandomParagraph, showError, makeWorksUrl, techMsg }

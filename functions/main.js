@@ -2,7 +2,7 @@ require('dotenv').config()
 const HTMLParser = require('node-html-parser');
 
 const { getRandomInt, array_chunks, loadPage, makeQueryString } = require('./helpers');
-const { searchWorkPage, getWorkData, makeWorkAnswer, makeWorksUrl, getWorkImages, getRandomParagraph } = require('./func');
+const { searchWorkPage, getWorkData, makeWorkAnswer, makeWorksUrl, getWorkImages, getRandomParagraph, techMsg } = require('./func');
 const { fkTagYears, fkTag, winterFkTag, ao3Url, fkTagCollections } = require('../constants');
 
 const set = async () => {
@@ -50,19 +50,18 @@ const cit = async () => {
         queryAttrs['work_search%5Bother_tag_names%5D'] = global.additionalTag;
     }
 
-    const techMsg = await bot.sendMessage(chatId, 'Открываю все работы');
-    const techMsgId = techMsg.message_id;
+    techMsg('Открываю все работы', true);
 
     const worksUrl = makeWorksUrl(global.seasonTag);
 
-    const { dom, randomWorkUrl } = await searchWorkPage(chatId, worksUrl, techMsgId, queryAttrs);
+    const { dom, randomWorkUrl } = await searchWorkPage(worksUrl, queryAttrs);
     const { fandom, title, downloadLink, summary } = await getWorkData(dom);
 
-    bot.editMessageText('Ищу случайный абзац', { chat_id: chatId, message_id: techMsgId });
+    techMsg('Ищу случайный абзац');
 
     const randomParagraphText = getRandomParagraph(dom);
 
-    bot.editMessageText('Все нашел!', { chat_id: chatId, message_id: techMsgId });
+    techMsg('Все нашел!');
 
     const text = makeWorkAnswer(title, fandom, summary);
 
@@ -106,19 +105,18 @@ const pic = async () => {
         queryAttrs['work_search%5Bother_tag_names%5D'] = global.additionalTag;
     }
 
-    const techMsg = await bot.sendMessage(chatId, 'Открываю все работы')
-    const techMsgId = techMsg.message_id;
+    techMsg('Открываю все работы', true);
 
     const worksUrl = makeWorksUrl(global.seasonTag);
 
-    const { dom, randomWorkUrl } = await searchWorkPage(chatId, worksUrl, techMsgId, queryAttrs);
+    const { dom, randomWorkUrl } = await searchWorkPage(worksUrl, queryAttrs);
     const { fandom, title, summary } = await getWorkData(dom);
 
     const { media, otherLinks } = getWorkImages(dom);
 
     const text = makeWorkAnswer(title, fandom, summary);
 
-    bot.editMessageText('Все нашел!', { chat_id: chatId, message_id: techMsgId });
+    techMsg('Все нашел!');
     console.log(`Для чат айди ${chatId} загружена работа ${randomWorkUrl}`);
 
     await bot.sendMessage(
