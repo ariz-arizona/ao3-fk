@@ -194,7 +194,7 @@ const collectionFinder = async (collection) => {
         links.push(link);
     });
 
-    linksChunks = array_chunks(links, 3);
+    linksChunks = array_chunks(links, 2);
     const keyboard = [];
     linksChunks.map(el => {
         const row = [];
