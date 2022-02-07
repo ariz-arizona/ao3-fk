@@ -308,9 +308,6 @@ const onCallbackQuery = async (callbackQuery) => {
     const chatId = msg.chat.id;
     // message_id: msg.message_id,
 
-    let content;
-    let dom;
-
     if (action.indexOf('set_') === 0) {
         const vars = action.replace('set_', '').split('_');
         global.additionalTag = fkTagYears[vars[0]];
@@ -336,14 +333,14 @@ const onCallbackQuery = async (callbackQuery) => {
         const vars = action.replace('collection_', '').split('_');
         const collection = fkTagCollections[vars[0]];
 
-        collectionFinder(collection);
+        await collectionFinder(collection);
     }
 
     if (action.indexOf('link_') === 0) {
         const vars = action.replace('link_', '');
         const url = `${ao3Url}${vars}`;
 
-        workParser(url);
+        await workParser(url);
     }
 
     return bot.answerCallbackQuery(callbackQuery.id);
