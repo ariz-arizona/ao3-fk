@@ -131,6 +131,10 @@ const techMsg = async (msg, isNew = false) => {
     const chatId = global.chatId;
     const techMsgId = global.techMsgId;
 
+    if (!bot || !chatId) {
+        return false;
+    }
+
     if (!techMsgId) {
         isNew = true;
     }

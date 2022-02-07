@@ -5,6 +5,7 @@ const express = require('express');
 const { fkTagYears, winterFkTag } = require('./constants');
 const { set, cit, pic, collection, onCallbackQuery } = require('./functions/main');
 const { showError } = require('./functions/func');
+const discord = require('./dicsord');
 
 const { BOT_TOKEN, CURRENT_HOST } = process.env;
 //todo port в переменные среды
@@ -83,3 +84,5 @@ app.post(`/callback`, async (_req, res) => {
 app.listen(APP_PORT, () => {
     console.log(`listening on ${APP_PORT}`)
 });
+
+discord();
