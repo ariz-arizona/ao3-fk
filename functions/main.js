@@ -139,11 +139,9 @@ const pic = async () => {
                 })
             }
             media.forEach(img => {
-                try {
-                    bot.sendMediaGroup(chatId, img);
-                } catch (error) {
-                    bot.sendMessage(chatId, img.join('\n'))
-                }
+                bot.sendMediaGroup(chatId, img).then(() => { }, () => {
+                    bot.sendMessage(chatId, `Не смог отправить картинки, поэтому вот ссылки:\n${img.map(el => el.media).join('\n')}`)
+                })
             })
         });
 
@@ -172,6 +170,129 @@ const collection = async () => {
             }
         }
     );
+    return true;
+}
+
+const collectionFinder = async (collection) => {
+    const url = `${ao3Url}/collections/${collection}/collections`;
+
+    techMsg('Собираю список коллекций', true);
+
+    const content = await loadPage(url);
+    const dom = HTMLParser.parse(content);
+
+    if (!dom.querySelector('.collection .stats dd:nth-child(4)')) {
+        throw new Error('notfound');
+    }
+
+    const domLinks = dom.querySelectorAll('.collection .stats dd:nth-child(4)');
+    const links = [];
+    domLinks.forEach(el => {
+        const link = {};
+        link.name = el.closest('.collection').querySelector('.heading > a').textContent;
+        link.href = el.querySelector('a').getAttribute('href');
+        links.push(link);
+    });
+
+    linksChunks = array_chunks(links, 3);
+    const keyboard = [];
+    linksChunks.map(el => {
+        const row = [];
+        el.map(link => {
+            row.push({ text: link.name, callback_data: `link_${link.href}` },)
+        })
+        keyboard.push(row);
+    });
+
+    await bot.sendMessage(chatId, 'Заглядываю в коллекции', {
+        reply_markup: {
+            inline_keyboard: keyboard
+        }
+    });
+
+    return true;
+}
+
+const workParser = async (url) => {
+    let content, dom, queryAttrs;
+
+    techMsg('Открываю коллекцию', true);
+
+    content = await loadPage(url);
+    dom = HTMLParser.parse(content);
+
+    const pagesCount = dom.querySelector('.pagination li:nth-last-child(2)') ? dom.querySelector('.pagination li:nth-last-child(2)').textContent : 1;
+    const randomPage = getRandomInt(1, pagesCount);
+
+    queryAttrs = {
+        'page': randomPage
+    };
+
+    techMsg('Ищу случайную работу');
+
+    content = await loadPage(`${url}${makeQueryString(queryAttrs)}`);
+    dom = HTMLParser.parse(content);
+
+    const allWorks = dom.querySelectorAll('ol.work > li');
+    const randomWorkNumber = getRandomInt(0, allWorks.length - 1);
+    const randomWork = allWorks[randomWorkNumber];
+
+    const href = randomWork.querySelector('.heading > a').getAttribute('href');
+
+    techMsg('Открываю случайную работу');
+
+    queryAttrs = {
+        'view_full_work': 'true',
+        'view_adult': 'true'
+    };
+    content = await loadPage(`${ao3Url}${href}${makeQueryString(queryAttrs)}`);
+    dom = HTMLParser.parse(content);
+
+    const { fandom, title, downloadLink, summary } = await getWorkData(dom);
+    const text = makeWorkAnswer(title, fandom, summary);
+
+    techMsg('Ищу отрывок');
+    const randomParagraphText = getRandomParagraph(dom);
+
+    techMsg('Ищу картинки');
+    const { media, otherLinks } = getWorkImages(dom);
+
+    techMsg('Все нашел!');
+
+    await bot.sendMessage(
+        chatId,
+        text.join('\n\n'),
+        {
+            parse_mode: 'HTML',
+            reply_markup: {
+                inline_keyboard: [
+                    [
+                        { text: 'Работа на AO3', url: `${ao3Url}${href}` },
+                        { text: 'EPUB', url: `${ao3Url}${downloadLink}` }
+                    ]
+                ]
+            }
+        }).then(() => {
+            if (otherLinks.length) {
+                otherLinks.forEach(link => {
+                    return bot.sendMessage(chatId, `Я нашел видео, посмотрите его по ссылке:\n${link}`);
+                })
+            }
+            if (media.length) {
+                media.forEach(img => {
+                    bot.sendMediaGroup(chatId, img).then(() => { }, () => {
+                        bot.sendMessage(chatId, `Не смог отправить картинки, поэтому вот ссылки:\n${img.map(el => el.media).join('\n')}`)
+                    })
+                })
+            }
+            return bot.sendMessage(
+                chatId,
+                `<b>Случайный параграф</b>\n${randomParagraphText}`,
+                {
+                    parse_mode: 'HTML',
+                }
+            );
+        });
     return true;
 }
 
@@ -211,115 +332,14 @@ const onCallbackQuery = async (callbackQuery) => {
         const vars = action.replace('collection_', '').split('_');
         const collection = fkTagCollections[vars[0]];
 
-        const url = `${ao3Url}/collections/${collection}/collections`;
-
-        content = await loadPage(url);
-        dom = HTMLParser.parse(content);
-
-        if (!dom.querySelector('.collection .stats dd:nth-child(4)')) {
-            throw new Error('notfound');
-        }
-
-        const domLinks = dom.querySelectorAll('.collection .stats dd:nth-child(4)');
-        const links = [];
-        domLinks.forEach(el => {
-            const link = {};
-            link.name = el.closest('.collection').querySelector('.heading > a').textContent;
-            link.href = el.querySelector('a').getAttribute('href');
-            links.push(link);
-        });
-
-        linksChunks = array_chunks(links, 3);
-        const keyboard = [];
-        linksChunks.map(el => {
-            const row = [];
-            el.map(link => {
-                row.push({ text: link.name, callback_data: `link_${link.href}` },)
-            })
-            keyboard.push(row);
-        });
-
-        bot.sendMessage(chatId, 'Заглядываю в коллекции', {
-            reply_markup: {
-                inline_keyboard: keyboard
-            }
-        })
+        collectionFinder(collection);
     }
 
     if (action.indexOf('link_') === 0) {
-        let queryAttrs;
-
         const vars = action.replace('link_', '');
         const url = `${ao3Url}${vars}`;
 
-        content = await loadPage(url);
-        dom = HTMLParser.parse(content);
-
-        const pagesCount = dom.querySelector('.pagination li:nth-last-child(2)') ? dom.querySelector('.pagination li:nth-last-child(2)').textContent : 1;
-        const randomPage = getRandomInt(1, pagesCount);
-
-        queryAttrs = {
-            'page': randomPage
-        };
-
-        content = await loadPage(`${url}${makeQueryString(queryAttrs)}`);
-        dom = HTMLParser.parse(content);
-
-        const allWorks = dom.querySelectorAll('ol.work > li');
-        const randomWorkNumber = getRandomInt(0, allWorks.length - 1);
-        const randomWork = allWorks[randomWorkNumber];
-
-        const href = randomWork.querySelector('.heading > a').getAttribute('href');
-
-        queryAttrs = {
-            'view_full_work': 'true',
-            'view_adult': 'true'
-        };
-        content = await loadPage(`${ao3Url}${href}${makeQueryString(queryAttrs)}`);
-        dom = HTMLParser.parse(content);
-
-        const { fandom, title, downloadLink, summary } = await getWorkData(dom);
-        const text = makeWorkAnswer(title, fandom, summary);
-
-        const randomParagraphText = getRandomParagraph(dom);
-        const { media, otherLinks } = getWorkImages(dom);
-
-        await bot.sendMessage(
-            chatId,
-            text.join('\n\n'),
-            {
-                parse_mode: 'HTML',
-                reply_markup: {
-                    inline_keyboard: [
-                        [
-                            { text: 'Работа на AO3', url: `${ao3Url}${href}` },
-                            { text: 'EPUB', url: `${ao3Url}${downloadLink}` }
-                        ]
-                    ]
-                }
-            }).then(() => {
-                if (otherLinks.length) {
-                    otherLinks.forEach(link => {
-                        return bot.sendMessage(chatId, `Я нашел видео, посмотрите его по ссылке:\n${link}`);
-                    })
-                }
-                if (media.length) {
-                    media.forEach(img => {
-                        try {
-                            bot.sendMediaGroup(chatId, img);
-                        } catch (error) {
-                            bot.sendMessage(chatId, img.join('\n'))
-                        }
-                    })
-                }
-                return bot.sendMessage(
-                    chatId,
-                    `<b>Случайный параграф</b>\n${randomParagraphText}`,
-                    {
-                        parse_mode: 'HTML',
-                    }
-                );
-            });
+        workParser(url);
     }
 
     return bot.answerCallbackQuery(callbackQuery.id);
