@@ -139,7 +139,11 @@ const pic = async () => {
                 })
             }
             media.forEach(img => {
-                return bot.sendMediaGroup(chatId, img);
+                try {
+                    bot.sendMediaGroup(chatId, img);
+                } catch (error) {
+                    bot.sendMessage(chatId, img.join('\n'))
+                }
             })
         });
 
