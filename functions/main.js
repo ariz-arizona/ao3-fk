@@ -282,13 +282,13 @@ const workParser = async (url) => {
             }
             if (media.length) {
                 media.forEach(img => {
-                    bot.sendMediaGroup(chatId, img).then(() => { }, () => {
+                    return bot.sendMediaGroup(chatId, img).then(() => { }, () => {
                         bot.sendMessage(chatId, `Не смог отправить картинки, поэтому вот ссылки:\n${img.map(el => el.media).join('\n')}`)
                     })
                 })
             }
             if (randomParagraphText) {
-                bot.sendMessage(
+                return bot.sendMessage(
                     chatId,
                     `<b>Случайный параграф</b>\n${randomParagraphText}`,
                     {
