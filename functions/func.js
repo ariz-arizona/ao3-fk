@@ -48,9 +48,9 @@ const searchWorkPage = async (worksUrl, queryAttrs) => {
 }
 
 const getWorkData = async (dom) => {
-    const fandom = dom.querySelector('dd.fandom.tags').textContent.trim();
-    const title = dom.querySelector('.title.heading').textContent.trim();
-    const downloadLink = dom.querySelector('.download > ul > li:nth-child(2) > a').getAttribute('href');
+    const fandom = dom.querySelector('dd.fandom.tags') ? dom.querySelector('dd.fandom.tags').textContent.trim() : 'Фандом не найден';
+    const title = dom.querySelector('.title.heading') ? dom.querySelector('.title.heading').textContent.trim() : 'Заголовок не найден';
+    const downloadLink = dom.querySelector('.download > ul > li:nth-child(2) > a') ? dom.querySelector('.download > ul > li:nth-child(2) > a').getAttribute('href') : null;
     const summary = dom.querySelector('.summary .userstuff') ? dom.querySelector('.summary .userstuff').textContent.trim() : '';
 
     return { fandom, title, downloadLink, summary }
@@ -94,7 +94,7 @@ const getRandomParagraph = dom => {
 
     do {
         randomParagraph = getRandomInt(0, paragraphs.length - 1);
-        randomParagraphText = paragraphs[randomParagraph].textContent.trim().substring(0, 2048);
+        randomParagraphText = paragraphs[randomParagraph] ? paragraphs[randomParagraph].textContent.trim().substring(0, 2048) : '';
 
         if (randomParagraphText === '') {
             paragraphs.splice(randomParagraph, 1)
@@ -119,7 +119,7 @@ const showError = (error) => {
             msg = 'Ой! Что-то случилось! Может, попробуете еще раз?';
     }
     bot.sendMessage(chatId, msg);
-    console.log(`Ошибка в чате ${chatId}\n${error}`);
+    console.log(`Ошибка в чате ${chatId}\n${error.code}`);
 }
 
 const makeWorksUrl = (seasonTag) => {

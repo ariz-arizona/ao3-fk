@@ -34,7 +34,7 @@ bot.on('error', (error) => {
 });
 
 bot.on('polling_error', (error) => {
-    console.log(error);
+    console.log(error.code);
 });
 
 app.use(express.json());
@@ -49,7 +49,7 @@ app.post(`/callback`, async (_req, res) => {
         const chatId = _req.body.message.chat.id;
         // const date = _req.body.message.date;
 
-        if (!global.chatId || global.chatId !== chatId) {
+        if (!global.chatId) {
             global.chatId = chatId;
         }
 

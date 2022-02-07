@@ -188,10 +188,12 @@ const collectionFinder = async (collection) => {
     const domLinks = dom.querySelectorAll('.collection .stats dd:nth-child(4)');
     const links = [];
     domLinks.forEach(el => {
-        const link = {};
-        link.name = el.closest('.collection').querySelector('.heading > a').textContent;
-        link.href = el.querySelector('a').getAttribute('href');
-        links.push(link);
+        if (el.closest('.collection').querySelector('.type').innerText.indexOf('Unrevealed') === -1) {
+            const link = {};
+            link.name = el.closest('.collection').querySelector('.heading > a').textContent;
+            link.href = el.querySelector('a').getAttribute('href');
+            links.push(link);
+        }
     });
 
     linksChunks = array_chunks(links, 2);
@@ -285,13 +287,15 @@ const workParser = async (url) => {
                     })
                 })
             }
-            return bot.sendMessage(
-                chatId,
-                `<b>Случайный параграф</b>\n${randomParagraphText}`,
-                {
-                    parse_mode: 'HTML',
-                }
-            );
+            if (randomParagraphText) {
+                bot.sendMessage(
+                    chatId,
+                    `<b>Случайный параграф</b>\n${randomParagraphText}`,
+                    {
+                        parse_mode: 'HTML',
+                    }
+                );
+            }
         });
     return true;
 }
