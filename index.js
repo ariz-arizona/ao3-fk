@@ -1,7 +1,7 @@
 require('dotenv').config()
 const TelegramBot = require('node-telegram-bot-api');
 const express = require('express');
-const { InteractionType } = require('discord-interactions');
+const { InteractionType, InteractionResponseType } = require('discord-interactions');
 
 const { fkTagYears, winterFkTag } = require('./constants');
 const { set, cit, pic, collection, onCallbackQuery } = require('./functions/main');
@@ -85,9 +85,16 @@ app.post(`/callback`, async (_req, res) => {
 
 app.post('/discord', async (_req, res) => {
     const message = _req.body;
-    console.log(message);
-    if (message.type === InteractionType.APPLICATION_COMMAND || message.type === InteractionType.APPLICATION_COMMAND_AUTOCOMPLETE) {
-        getRandomCit(message);
+
+    if (message.type === InteractionType.PING) {
+        res.send({
+            type: InteractionResponseType.PONG,
+        });
+        
+    } else if (message.type === InteractionType.APPLICATION_COMMAND || message.type === InteractionType.APPLICATION_COMMAND_AUTOCOMPLETE) {
+        console.log(message);
+        // getRandomCit(message);
+
     } else {
         res.status(400).send({ error: "Unknown Type" });
     }
