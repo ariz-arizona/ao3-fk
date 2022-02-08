@@ -6,6 +6,7 @@ const { fkTagYears, winterFkTag } = require('./constants');
 const { set, cit, pic, collection, onCallbackQuery } = require('./functions/main');
 const { showError } = require('./functions/func');
 const discord = require('./dicsord');
+const { InteractionType } = require('discord-interactions');
 
 const { BOT_TOKEN, CURRENT_HOST } = process.env;
 //todo port в переменные среды
@@ -79,6 +80,16 @@ app.post(`/callback`, async (_req, res) => {
     }
 
     res.sendStatus(200);
+});
+
+app.post('/discord', async (_req, res) => {
+    const message = _req.body;
+
+    if (message.type === InteractionType.APPLICATION_COMMAND || message.type === InteractionType.APPLICATION_COMMAND_AUTOCOMPLETE) {
+        discord.getRandomCit(message);
+    } else {
+        res.status(400).send({ error: "Unknown Type" });
+    }
 });
 
 app.listen(APP_PORT, () => {

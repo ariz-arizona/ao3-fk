@@ -12,6 +12,7 @@
   "dependencies": {
     "@discordjs/builders": "^0.7.0",
     "cross-fetch": "^3.1.4",
+    "discord-interactions": "^2.4.1",
     "discord-slash-commands-v12": "^7.9.12",
     "discord.js": "^12.5.3",
     "dotenv": "^11.0.0",
