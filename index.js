@@ -7,8 +7,6 @@ const { fkTagYears, winterFkTag, ao3Url } = require('./constants');
 const { set, cit, pic, collection, onCallbackQuery } = require('./functions/main');
 const { showError, makeWorkAnswer, makeWorksUrl, searchWorkPage, getRandomParagraph, getWorkImages, getWorkData } = require('./functions/func');
 
-const { getRandomCit } = require('./dicsord');
-
 const { BOT_TOKEN, CURRENT_HOST } = process.env;
 //todo port в переменные среды
 const APP_PORT = 443;
