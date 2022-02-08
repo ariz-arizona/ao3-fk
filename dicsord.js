@@ -19,8 +19,9 @@ const discord = async () => {
 
     // даунгрейд до 12 версии
     client.on('message', async (msg) => {
+        // console.log(msg)
         if (msg.author.bot) return;
-        if (!msg.guild) return;
+        // if (!msg.guild) return;
         if (!msg.content.startsWith(prefix)) return;
 
         const args = msg.content.slice(prefix.length).trim().split(/ +/g);
