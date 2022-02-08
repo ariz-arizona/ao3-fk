@@ -19,20 +19,21 @@ const discord = async () => {
         console.log('Ready!');
     });
 
-    client.login(DISCORD_TOKEN);
-
     // const rest = new REST({ version: '9' }).setToken(DISCORD_TOKEN);
 
     // rest.put(Routes.applicationGuildCommands(DISCORD_CLIENT_ID, DISCORD_GUILD_ID), { body: commands })
     //     .then(() => console.log('Successfully registered application commands.'))
     //     .catch(console.error);
 
-    client.on('interactionCreate', async interaction => {
+
+    //даунгрейд до 12 версии из-за ограничений ноды на сервере
+    client.on('message', async interaction => {
+        console.log(interaction)
         if (!interaction.isCommand()) return;
 
-        const { commandName } = interaction;
+        const { content  } = interaction;
 
-        switch (commandName) {
+        switch (content) {
             case 'random':
                 await interaction.reply(`Начинаю искать по тегам ${global.additionalTag} и ${global.seasonTag}`);
 
@@ -92,6 +93,9 @@ const discord = async () => {
             default:
         }
     });
+    
+    client.login(DISCORD_TOKEN);
+
 }
 
 module.exports = discord
