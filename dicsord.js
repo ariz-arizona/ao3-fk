@@ -1,4 +1,4 @@
-const { Client, Intents } = require('discord.js');
+const { Client, Intents, MessageAttachment } = require('discord.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
@@ -34,45 +34,60 @@ const discord = async () => {
 
         switch (commandName) {
             case 'random':
-                await interaction.reply('Working on it');
+                await interaction.reply(`Начинаю искать по тегам ${global.additionalTag} и ${global.seasonTag}`);
 
                 const queryAttrs = {
-
+                    // 'work_search%5Bwords_to%5D': 100
                 };
+
                 if (global.additionalTag) {
                     queryAttrs['work_search%5Bother_tag_names%5D'] = global.additionalTag;
                 }
 
                 const worksUrl = makeWorksUrl(global.seasonTag);
                 const { dom, randomWorkUrl } = await searchWorkPage(worksUrl, queryAttrs);
+
+                await interaction.editReply(`Собираю данные работы`);
                 const { fandom, title, downloadLink, summary } = await getWorkData(dom);
+
+                await interaction.editReply(`Ищу случайный абзац`);
                 const randomParagraphText = getRandomParagraph(dom);
+
+                await interaction.editReply(`Ищу картинки`);
                 const { media, otherLinks } = getWorkImages(dom);
 
                 const images = [];
                 media.map(el => {
                     el.map(img => {
-                        if (img && img.length) {
-                            img.forEach(element => {
-                                images.push(element.media)
-                            })
-                        }
+                        images.push(img.media)
                     })
                 })
 
                 const response = [
                     `**Фандом** ${fandom}`,
-                    `**${title}**`,
-                    summary,
-                    `**Ссылка на скачивание** ${ao3Url}${downloadLink}`,
-                    `**Ссылка на страницу работы** ${ao3Url}${randomWorkUrl}`,
-                    '',
-                    randomParagraphText,
-                    images.join('\n')
-                ]
+                    `**Название** ${title}`,
+                ];
 
-                await interaction.editReply(response.join('\n'));
+                if (summary) {
+                    response.push(`\n${summary}`);
+                }
 
+                response.push(`[Ссылка на скачивание](${ao3Url}${downloadLink})`);
+                response.push(`[Ссылка на страницу работы](${ao3Url}${randomWorkUrl})`);
+
+                if (randomParagraphText) {
+                    response.push(`\n**Случайный абзац**\n${randomParagraphText}`)
+                }
+
+                if (images.length) {
+                    response.push(`\nНашел картинки: ${images.join('\n')}`)
+                }
+
+                if (otherLinks.length) {
+                    response.push(`\nНашел видео: ${otherLinks.join('\n')}`)
+                }
+
+                await interaction.editReply({ content: response.join('\n') });
                 break;
             default:
         }
