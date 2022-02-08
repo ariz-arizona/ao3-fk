@@ -1,7 +1,7 @@
 const { Client, Intents, MessageAttachment } = require('discord.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { REST } = require('@discordjs/rest');
-const { Routes } = require('discord-api-types/v9');
+// const { REST } = require('@discordjs/rest');
+// const { Routes } = require('discord-api-types/v9');
 const { makeWorksUrl, searchWorkPage, getWorkData, getWorkImages, getRandomParagraph, makeWorkAnswer } = require('./functions/func');
 const { ao3Url } = require('./constants');
 
@@ -21,11 +21,11 @@ const discord = async () => {
 
     client.login(DISCORD_TOKEN);
 
-    const rest = new REST({ version: '9' }).setToken(DISCORD_TOKEN);
+    // const rest = new REST({ version: '9' }).setToken(DISCORD_TOKEN);
 
-    rest.put(Routes.applicationGuildCommands(DISCORD_CLIENT_ID, DISCORD_GUILD_ID), { body: commands })
-        .then(() => console.log('Successfully registered application commands.'))
-        .catch(console.error);
+    // rest.put(Routes.applicationGuildCommands(DISCORD_CLIENT_ID, DISCORD_GUILD_ID), { body: commands })
+    //     .then(() => console.log('Successfully registered application commands.'))
+    //     .catch(console.error);
 
     client.on('interactionCreate', async interaction => {
         if (!interaction.isCommand()) return;
