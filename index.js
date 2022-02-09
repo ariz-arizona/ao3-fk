@@ -126,7 +126,7 @@ app.post('/discord', async (_req, res) => {
         });
     } else if (message.type === InteractionType.APPLICATION_COMMAND || message.type === InteractionType.APPLICATION_COMMAND_AUTOCOMPLETE) {
         try {
-            fetch(`http://${_req.headers.host}/random/${message.token}`, { type: 'post' });
+            fetch(`https://${_req.headers.host}/random/${message.token}`, { type: 'post' });
 
             res.send({
                 type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE,
