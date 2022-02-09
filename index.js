@@ -102,7 +102,12 @@ app.all('/random/:token', async (_req, res) => {
     //     return res.status(401).send({ error: 'Bad request signature ' });
     // }
 
-    await makeWorkDiscord(_req.params.token);
+    const { token } = _req.params;
+    if (!token) {
+        return;
+    }
+
+    await makeWorkDiscord(token, id);
     res.sendStatus(200)
 })
 
@@ -128,10 +133,9 @@ app.post('/discord', async (_req, res) => {
         });
     } else if (message.type === InteractionType.APPLICATION_COMMAND || message.type === InteractionType.APPLICATION_COMMAND_AUTOCOMPLETE) {
         try {
-            fetch(`https://${_req.headers.host}/random/${message.token}`, { type: 'post' });
-
+            fetch(`http://${_req.headers.host}/random/${message.token}`, { type: 'post' });
             res.send({
-                type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE,
+                type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                 data: {
                     content: `Начинаю искать случайную работу`
                 }
