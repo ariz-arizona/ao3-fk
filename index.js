@@ -129,13 +129,15 @@ app.post('/discord', async (_req, res) => {
         const worksUrl = makeWorksUrl(global.seasonTag);
         const { dom, randomWorkUrl } = await searchWorkPage(worksUrl, queryAttrs);
 
-        await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${message.token}/messages/@original`, {
+        const test = await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${message.token}/messages/@original`, {
             headers: { 'Content-Type': 'application/json' },
             method: "PATCH",
             body: JSON.stringify({
                 content: `Нашел работу ${randomWorkUrl}`
             })
         });
+
+        console.log(test)
 
         const { fandom, title, downloadLink, summary } = await getWorkData(dom);
         const randomParagraphText = getRandomParagraph(dom).slice(0, 900);
