@@ -7,6 +7,7 @@ const { InteractionType, InteractionResponseType, verifyKey } = require('discord
 const { fkTagYears, winterFkTag, ao3Url } = require('./constants');
 const { set, cit, pic, collection, onCallbackQuery, makeWorkDiscord } = require('./functions/main');
 const { showError } = require('./functions/func');
+const { sendStatus } = require('express/lib/response');
 
 const { BOT_TOKEN, CURRENT_HOST, DISCORD_APPLICATION_ID } = process.env;
 //todo port в переменные среды
@@ -101,7 +102,8 @@ app.all('/random/:token', async (_req, res) => {
     //     return res.status(401).send({ error: 'Bad request signature ' });
     // }
 
-    makeWorkDiscord(_req.params.token);
+    await makeWorkDiscord(_req.params.token);
+    res,sendStatus(200)
 })
 
 app.post('/discord', async (_req, res) => {
