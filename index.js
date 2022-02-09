@@ -127,7 +127,7 @@ console.log(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${mes
             }
             const worksUrl = makeWorksUrl(global.seasonTag);
             const { dom, randomWorkUrl } = await searchWorkPage(worksUrl, queryAttrs);
-
+console.log('after searchWorkPage')
             await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${message.token}/messages/@original`, {
                 headers: { 'Content-Type': 'application/json' },
                 method: "PATCH",
@@ -135,6 +135,7 @@ console.log(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${mes
                     content: `Нашел работу ${randomWorkUrl}`
                 })
             });
+            console.log('after fetch webhooks')
 
             const { fandom, title, downloadLink, summary } = await getWorkData(dom);
             const randomParagraphText = getRandomParagraph(dom).slice(0, 900);
