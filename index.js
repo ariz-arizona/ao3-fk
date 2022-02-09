@@ -114,7 +114,7 @@ app.post('/discord', async (_req, res) => {
             }
 
             res.send({
-                type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE,
                 data: {
                     content: `Начинаю искать случайную работу`
                 }
