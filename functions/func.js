@@ -134,7 +134,11 @@ const techMsg = async (msg, isNew = false) => {
     const bot = global.bot;
     const chatId = global.chatId;
     const techMsgId = global.techMsgId;
-
+console.log({
+    bot,
+    chatId,
+    techMsgId
+})
     if (!bot || !chatId) {
         return false;
     }
@@ -148,7 +152,7 @@ const techMsg = async (msg, isNew = false) => {
         const techMsgId = techMsg.message_id;
         global.techMsgId = techMsgId;
     } else {
-        bot.editMessageText(msg, { chat_id: chatId, message_id: techMsgId });
+        await bot.editMessageText(msg, { chat_id: chatId, message_id: techMsgId });
     }
 }
 
