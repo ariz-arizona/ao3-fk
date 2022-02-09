@@ -8,7 +8,7 @@ const searchWorkPage = async (worksUrl, queryAttrs) => {
     // const bot = global.bot;
     const chatId = global.chatId;
 
-    // console.log(`search work page ${chatId}`)
+    console.log(`search work page ${worksUrl}`)
     let pageQuery = {};
     let content;
     let dom;
@@ -19,10 +19,11 @@ const searchWorkPage = async (worksUrl, queryAttrs) => {
     if (!dom.querySelector('.pagination li:nth-last-child(2) a')) {
         throw new Error('notfound');
     }
-
+    
     const lastPageUrl = dom.querySelector('.pagination li:nth-last-child(2) a').getAttribute('href');
     const searchParams = getSearchParametres(lastPageUrl);
     const randomPage = getRandomInt(1, searchParams.page);
+    console.log(`search work page ${searchParams}`)
 
     pageQuery = searchParams;
     pageQuery.page = randomPage;

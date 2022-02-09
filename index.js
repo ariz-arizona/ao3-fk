@@ -109,7 +109,6 @@ app.post('/discord', async (_req, res) => {
         });
     } else if (message.type === InteractionType.APPLICATION_COMMAND || message.type === InteractionType.APPLICATION_COMMAND_AUTOCOMPLETE) {
         try {
-
             const queryAttrs = {
                 // 'work_search%5Bwords_to%5D': 100
             };
@@ -127,9 +126,10 @@ app.post('/discord', async (_req, res) => {
             if (global.additionalTag) {
                 queryAttrs['work_search%5Bother_tag_names%5D'] = global.additionalTag;
             }
-            console.log('before makeWorksUrl')
             const worksUrl = makeWorksUrl(global.seasonTag);
+            console.log('before searchWorkPage')
             const { dom, randomWorkUrl } = await searchWorkPage(worksUrl, queryAttrs);
+
             console.log(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${message.token}/messages/@original`)
             await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${message.token}/messages/@original`, {
                 headers: { 'Content-Type': 'application/json' },
@@ -139,7 +139,6 @@ app.post('/discord', async (_req, res) => {
                 })
             });
             console.log('after await webhook')
-            console.log(test)
 
             const { fandom, title, downloadLink, summary } = await getWorkData(dom);
             const randomParagraphText = getRandomParagraph(dom).slice(0, 900);
