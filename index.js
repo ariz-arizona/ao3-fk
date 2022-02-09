@@ -113,7 +113,7 @@ app.post('/discord', async (_req, res) => {
                 // 'work_search%5Bwords_to%5D': 100
             };
             console.log('before msg send')
-            res.status(200).send({
+            res.send({
                 type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                 data: {
                     tts: false,
@@ -193,7 +193,6 @@ app.post('/discord', async (_req, res) => {
                     embeds: [embed]
                 })
             });
-
         } catch (error) {
             await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${message.token}`, {
                 headers: { 'Content-Type': 'application/json' },
@@ -203,6 +202,7 @@ app.post('/discord', async (_req, res) => {
                 })
             });
             console.log(error)
+            res.sendStatus(500)
         }
     } else {
         res.status(400).send({ error: "Unknown Type" });
