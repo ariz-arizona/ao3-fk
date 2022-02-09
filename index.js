@@ -111,7 +111,7 @@ app.post('/discord', async (_req, res) => {
         const queryAttrs = {
             // 'work_search%5Bwords_to%5D': 100
         };
-
+console.log('before msg send')
         res.status(200).send({
             type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
             data: {
@@ -125,10 +125,10 @@ app.post('/discord', async (_req, res) => {
         if (global.additionalTag) {
             queryAttrs['work_search%5Bother_tag_names%5D'] = global.additionalTag;
         }
-
+        console.log('before makeWorksUrl')
         const worksUrl = makeWorksUrl(global.seasonTag);
         const { dom, randomWorkUrl } = await searchWorkPage(worksUrl, queryAttrs);
-
+        console.log(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${message.token}/messages/@original`)
         const test = await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${message.token}/messages/@original`, {
             headers: { 'Content-Type': 'application/json' },
             method: "PATCH",
@@ -136,7 +136,7 @@ app.post('/discord', async (_req, res) => {
                 content: `Нашел работу ${randomWorkUrl}`
             })
         });
-
+        console.log('after await webhook')
         console.log(test)
 
         const { fandom, title, downloadLink, summary } = await getWorkData(dom);
