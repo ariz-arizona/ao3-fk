@@ -24,19 +24,21 @@ const getSearchParametres = (url) => {
 }
 
 const loadPage = async (url) => {
-    // console.log(url)
+    console.log(`loadPage ${url}`)
     if (!url) {
         return false
     }
     try {
         const res = await fetch(url);
-
+        console.log(`get res ${res}`)
         if (res.status >= 400) {
             throw new Error("Bad response from server");
         }
 
         return await res.text();
     } catch (err) {
+    console.log(err)
+        
         console.error(err);
     }
 };
