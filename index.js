@@ -190,13 +190,13 @@ app.post('/discord', async (_req, res) => {
                     })
                 });
             }
-            makeWork();
+            await makeWork();
             res.send({
                 type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE,
                 data: {
                     content: `Начинаю искать случайную работу`
                 }
-            });
+            })
 
         } catch (error) {
             await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${message.token}`, {
