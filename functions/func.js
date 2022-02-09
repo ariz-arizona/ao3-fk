@@ -147,13 +147,13 @@ console.log({
         isNew = true;
     }
 
-    if (isNew) {
-        const techMsg = await bot.sendMessage(chatId, 'Открываю все работы');
-        const techMsgId = techMsg.message_id;
-        global.techMsgId = techMsgId;
-    } else {
-        await bot.editMessageText(msg, { chat_id: chatId, message_id: techMsgId });
-    }
+//     if (isNew) {
+//         const techMsg = await bot.sendMessage(chatId, 'Открываю все работы');
+//         const techMsgId = techMsg.message_id;
+//         global.techMsgId = techMsgId;
+//     } else {
+//         await bot.editMessageText(msg, { chat_id: chatId, message_id: techMsgId });
+//     }
 }
 
 module.exports = { searchWorkPage, getWorkData, makeWorkAnswer, getWorkImages, getRandomParagraph, showError, makeWorksUrl, techMsg }
