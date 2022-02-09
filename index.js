@@ -112,14 +112,7 @@ app.post('/discord', async (_req, res) => {
             const queryAttrs = {
                 // 'work_search%5Bwords_to%5D': 100
             }
-            makeWork();
-            res.send({
-                type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE,
-                data: {
-                    content: `Начинаю искать случайную работу`
-                }
-            });
-
+            
             const makeWork = async () => {
                 await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${message.token}/messages/@original`, {
                     headers: { 'Content-Type': 'application/json' },
@@ -197,6 +190,13 @@ app.post('/discord', async (_req, res) => {
                     })
                 });
             }
+            makeWork();
+            res.send({
+                type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE,
+                data: {
+                    content: `Начинаю искать случайную работу`
+                }
+            });
 
         } catch (error) {
             await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${message.token}`, {
