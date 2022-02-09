@@ -103,7 +103,7 @@ app.all('/random/:token', async (_req, res) => {
     // }
 
     await makeWorkDiscord(_req.params.token);
-    res,sendStatus(200)
+    res.sendStatus(200)
 })
 
 app.post('/discord', async (_req, res) => {
