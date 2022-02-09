@@ -5,10 +5,10 @@ const fetch = require('cross-fetch');
 const { InteractionType, InteractionResponseType, verifyKey } = require('discord-interactions');
 
 const { fkTagYears, winterFkTag, ao3Url } = require('./constants');
-const { set, cit, pic, collection, onCallbackQuery } = require('./functions/main');
-const { showError, makeWorkAnswer, makeWorksUrl, searchWorkPage, getRandomParagraph, getWorkImages, getWorkData } = require('./functions/func');
+const { set, cit, pic, collection, onCallbackQuery, makeWorkDiscord } = require('./functions/main');
+const { showError } = require('./functions/func');
 
-const { BOT_TOKEN, CURRENT_HOST, DISCORD_APPLICATION_ID, DISCORD_TOKEN } = process.env;
+const { BOT_TOKEN, CURRENT_HOST, DISCORD_APPLICATION_ID } = process.env;
 //todo port в переменные среды
 const APP_PORT = 443;
 
@@ -87,6 +87,23 @@ app.post(`/callback`, async (_req, res) => {
     res.sendStatus(200);
 });
 
+app.all('/random/:token', async (_req, res) => {
+    // const signature = _req.headers['x-signature-ed25519'];
+    // const timestamp = _req.headers['x-signature-timestamp'];
+    // const isValidRequest = verifyKey(
+    //     _req.rawBody,
+    //     signature,
+    //     timestamp,
+    //     process.env.DISCORD_PUB_KEY
+    // );
+
+    // if (!isValidRequest) {
+    //     return res.status(401).send({ error: 'Bad request signature ' });
+    // }
+
+    makeWorkDiscord(_req.params.token);
+})
+
 app.post('/discord', async (_req, res) => {
     const signature = _req.headers['x-signature-ed25519'];
     const timestamp = _req.headers['x-signature-timestamp'];
@@ -109,88 +126,8 @@ app.post('/discord', async (_req, res) => {
         });
     } else if (message.type === InteractionType.APPLICATION_COMMAND || message.type === InteractionType.APPLICATION_COMMAND_AUTOCOMPLETE) {
         try {
-            const queryAttrs = {
-                // 'work_search%5Bwords_to%5D': 100
-            }
-            
-            const makeWork = async () => {
-                await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${message.token}/messages/@original`, {
-                    headers: { 'Content-Type': 'application/json' },
-                    method: "PATCH",
-                    body: JSON.stringify({
-                        content: `Начинаю искать случайную работу по тегам ${[global.additionalTag, global.seasonTag].join(', ')}`
-                    })
-                });
+            fetch(`http://${_req.headers.host}/random/${message.token}`, { type: 'post' });
 
-                if (global.additionalTag) {
-                    queryAttrs['work_search%5Bother_tag_names%5D'] = global.additionalTag;
-                }
-                const worksUrl = makeWorksUrl(global.seasonTag);
-                const { dom, randomWorkUrl } = await searchWorkPage(worksUrl, queryAttrs);
-
-                await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${message.token}/messages/@original`, {
-                    headers: { 'Content-Type': 'application/json' },
-                    method: "PATCH",
-                    body: JSON.stringify({
-                        content: `Нашел работу ${randomWorkUrl}`
-                    })
-                });
-
-                const { fandom, title, downloadLink, summary } = await getWorkData(dom);
-                const randomParagraphText = getRandomParagraph(dom).slice(0, 900);
-                const { media, otherLinks } = getWorkImages(dom);
-                const images = [];
-                media.map(el => {
-                    el.map(img => {
-                        images.push(img.media)
-                    })
-                })
-
-                const embed = {
-                    type: 'rich',
-                    title: title,
-                    fandom: fandom,
-                    url: `${ao3Url}${randomWorkUrl}`,
-                    fields: [
-                        {
-                            name: 'Фандом',
-                            value: fandom,
-                        },
-                        {
-                            name: 'Ссылка для скачивания',
-                            value: `${ao3Url}${downloadLink}`,
-                        },
-                    ],
-                }
-                if (randomParagraphText) embed.fields.push({
-                    name: 'Случайный абзац',
-                    value: randomParagraphText
-                });
-                if (summary) embed.fields.push({
-                    name: 'Саммари',
-                    value: summary,
-                });
-                if (images.length) {
-                    embed.image = { url: images[0] };
-                    embed.fields.push({
-                        name: 'Картинки',
-                        value: images.join('\n'),
-                    });
-                }
-                if (otherLinks.length) embed.fields.push({
-                    name: 'Видео',
-                    value: otherLinks.join('\n'),
-                });
-
-                await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${message.token}`, {
-                    headers: { 'Content-Type': 'application/json' },
-                    method: "post",
-                    body: JSON.stringify({
-                        embeds: [embed]
-                    })
-                });
-            }
-            await makeWork();
             res.send({
                 type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE,
                 data: {

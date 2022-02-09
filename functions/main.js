@@ -1,9 +1,12 @@
 require('dotenv').config()
 const HTMLParser = require('node-html-parser');
+const { default: fetch } = require('cross-fetch');
 
 const { getRandomInt, array_chunks, loadPage, makeQueryString } = require('./helpers');
 const { searchWorkPage, getWorkData, makeWorkAnswer, makeWorksUrl, getWorkImages, getRandomParagraph, techMsg } = require('./func');
 const { fkTagYears, fkTag, winterFkTag, ao3Url, fkTagCollections } = require('../constants');
+
+const { DISCORD_APPLICATION_ID } = process.env;
 
 const set = async () => {
     const bot = global.bot;
@@ -346,4 +349,85 @@ const onCallbackQuery = async (callbackQuery) => {
     return bot.answerCallbackQuery(callbackQuery.id);
 }
 
-module.exports = { set, cit, pic, collection, onCallbackQuery }
+const makeWorkDiscord = async (token) => {
+    const queryAttrs = {
+        // 'work_search%5Bwords_to%5D': 100
+    }
+    await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${token}`, {
+        headers: { 'Content-Type': 'application/json' },
+        method: "post",
+        body: JSON.stringify({
+            content: `Начинаю искать случайную работу по тегам ${[global.additionalTag, global.seasonTag].join(', ')}`
+        })
+    });
+
+    if (global.additionalTag) {
+        queryAttrs['work_search%5Bother_tag_names%5D'] = global.additionalTag;
+    }
+    const worksUrl = makeWorksUrl(global.seasonTag);
+    const { dom, randomWorkUrl } = await searchWorkPage(worksUrl, queryAttrs);
+
+    await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${token}/messages/@original`, {
+        headers: { 'Content-Type': 'application/json' },
+        method: "PATCH",
+        body: JSON.stringify({
+            content: `Нашел работу ${randomWorkUrl}`
+        })
+    });
+
+    const { fandom, title, downloadLink, summary } = await getWorkData(dom);
+    const randomParagraphText = getRandomParagraph(dom).slice(0, 900);
+    const { media, otherLinks } = getWorkImages(dom);
+    const images = [];
+    media.map(el => {
+        el.map(img => {
+            images.push(img.media)
+        })
+    })
+
+    const embed = {
+        type: 'rich',
+        title: title,
+        fandom: fandom,
+        url: `${ao3Url}${randomWorkUrl}`,
+        fields: [
+            {
+                name: 'Фандом',
+                value: fandom,
+            },
+            {
+                name: 'Ссылка для скачивания',
+                value: `${ao3Url}${downloadLink}`,
+            },
+        ],
+    }
+    if (randomParagraphText) embed.fields.push({
+        name: 'Случайный абзац',
+        value: randomParagraphText
+    });
+    if (summary) embed.fields.push({
+        name: 'Саммари',
+        value: summary,
+    });
+    if (images.length) {
+        embed.image = { url: images[0] };
+        embed.fields.push({
+            name: 'Картинки',
+            value: images.join('\n'),
+        });
+    }
+    if (otherLinks.length) embed.fields.push({
+        name: 'Видео',
+        value: otherLinks.join('\n'),
+    });
+
+    await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${token}`, {
+        headers: { 'Content-Type': 'application/json' },
+        method: "post",
+        body: JSON.stringify({
+            embeds: [embed]
+        })
+    });
+}
+
+module.exports = { set, cit, pic, collection, onCallbackQuery, makeWorkDiscord }
