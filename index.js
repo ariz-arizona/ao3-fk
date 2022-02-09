@@ -121,7 +121,7 @@ app.post('/discord', async (_req, res) => {
                     allowed_mentions: []
                 }
             });
-
+console.log(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${message.token}/messages/@original`)
             if (global.additionalTag) {
                 queryAttrs['work_search%5Bother_tag_names%5D'] = global.additionalTag;
             }
