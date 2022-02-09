@@ -112,14 +112,13 @@ app.post('/discord', async (_req, res) => {
             const queryAttrs = {
                 // 'work_search%5Bwords_to%5D': 100
             };
-            res.send({
-                type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-                data: {
-                    tts: false,
-                    content: `Начинаю искать случайную работу по тегам ${[global.additionalTag, global.seasonTag].join(', ')}`,
-                    flags: 1 << 6,
-                    allowed_mentions: []
-                }
+
+            await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${message.token}/messages/@original`, {
+                headers: { 'Content-Type': 'application/json' },
+                method: "post",
+                body: JSON.stringify({
+                    content: `Начинаю искать случайную работу по тегам ${[global.additionalTag, global.seasonTag].join(', ')}`
+                })
             });
 
             if (global.additionalTag) {
@@ -127,7 +126,7 @@ app.post('/discord', async (_req, res) => {
             }
             const worksUrl = makeWorksUrl(global.seasonTag);
             const { dom, randomWorkUrl } = await searchWorkPage(worksUrl, queryAttrs);
-console.log('after searchWorkPage')
+
             await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${message.token}/messages/@original`, {
                 headers: { 'Content-Type': 'application/json' },
                 method: "PATCH",
@@ -135,7 +134,6 @@ console.log('after searchWorkPage')
                     content: `Нашел работу ${randomWorkUrl}`
                 })
             });
-            console.log('after fetch webhooks')
 
             const { fandom, title, downloadLink, summary } = await getWorkData(dom);
             const randomParagraphText = getRandomParagraph(dom).slice(0, 900);
@@ -183,12 +181,18 @@ console.log('after searchWorkPage')
                 value: otherLinks.join('\n'),
             });
 
-            await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${message.token}`, {
-                headers: { 'Content-Type': 'application/json' },
-                method: "post",
-                body: JSON.stringify({
+            // await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${message.token}`, {
+            //     headers: { 'Content-Type': 'application/json' },
+            //     method: "post",
+            //     body: JSON.stringify({
+            //         embeds: [embed]
+            //     })
+            // });
+            res.send({
+                type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                data: {
                     embeds: [embed]
-                })
+                }
             });
         } catch (error) {
             await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${message.token}`, {

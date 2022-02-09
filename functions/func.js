@@ -8,25 +8,21 @@ const searchWorkPage = async (worksUrl, queryAttrs) => {
     // const bot = global.bot;
     const chatId = global.chatId;
 
-    console.log(`search work page ${worksUrl}`)
+    // console.log(`search work page ${chatId}`)
     let pageQuery = {};
     let content;
     let dom;
 
-    console.log(`loadPage`)
     content = await loadPage(`${worksUrl}${makeQueryString(queryAttrs)}`);
-    console.log(`parse content`)
     dom = HTMLParser.parse(content);
 
     if (!dom.querySelector('.pagination li:nth-last-child(2) a')) {
-        console.log(`no pagination`)
         throw new Error('notfound');
     }
+
     const lastPageUrl = dom.querySelector('.pagination li:nth-last-child(2) a').getAttribute('href');
-    console.log(`lastPageUrl ${lastPageUrl}`)
     const searchParams = getSearchParametres(lastPageUrl);
     const randomPage = getRandomInt(1, searchParams.page);
-    console.log(`search work page ${searchParams}`)
 
     pageQuery = searchParams;
     pageQuery.page = randomPage;
@@ -134,11 +130,7 @@ const techMsg = async (msg, isNew = false) => {
     const bot = global.bot;
     const chatId = global.chatId;
     const techMsgId = global.techMsgId;
-console.log({
-    bot,
-    chatId,
-    techMsgId
-})
+
     if (!bot || !chatId) {
         return false;
     }
@@ -147,13 +139,13 @@ console.log({
         isNew = true;
     }
 
-//     if (isNew) {
-//         const techMsg = await bot.sendMessage(chatId, 'Открываю все работы');
-//         const techMsgId = techMsg.message_id;
-//         global.techMsgId = techMsgId;
-//     } else {
-//         await bot.editMessageText(msg, { chat_id: chatId, message_id: techMsgId });
-//     }
+    if (isNew) {
+        const techMsg = await bot.sendMessage(chatId, 'Открываю все работы');
+        const techMsgId = techMsg.message_id;
+        global.techMsgId = techMsgId;
+    } else {
+        bot.editMessageText(msg, { chat_id: chatId, message_id: techMsgId });
+    }
 }
 
 module.exports = { searchWorkPage, getWorkData, makeWorkAnswer, getWorkImages, getRandomParagraph, showError, makeWorksUrl, techMsg }
