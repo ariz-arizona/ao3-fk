@@ -1,13 +1,14 @@
-require('dotenv').config()
+require('dotenv').config({ path: 'dev.env' })
 const TelegramBot = require('node-telegram-bot-api');
 const express = require('express');
+const fetch = require('cross-fetch');
 const { InteractionType, InteractionResponseType, verifyKey } = require('discord-interactions');
 
 const { fkTagYears, winterFkTag, ao3Url } = require('./constants');
 const { set, cit, pic, collection, onCallbackQuery } = require('./functions/main');
 const { showError, makeWorkAnswer, makeWorksUrl, searchWorkPage, getRandomParagraph, getWorkImages, getWorkData } = require('./functions/func');
 
-const { BOT_TOKEN, CURRENT_HOST } = process.env;
+const { BOT_TOKEN, CURRENT_HOST, DISCORD_APPLICATION_ID, DISCORD_TOKEN } = process.env;
 //todo port в переменные среды
 const APP_PORT = 443;
 
@@ -101,7 +102,7 @@ app.post('/discord', async (_req, res) => {
     }
 
     const message = _req.body;
-    console.log(message)
+
     if (message.type === InteractionType.PING) {
         res.status(200).send({
             type: InteractionResponseType.PONG,
@@ -111,12 +112,30 @@ app.post('/discord', async (_req, res) => {
             // 'work_search%5Bwords_to%5D': 100
         };
 
+        res.status(200).send({
+            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+            data: {
+                tts: false,
+                content: `Начинаю искать случайную работу по тегам ${[global.additionalTag, global.seasonTag].join(', ')}`,
+                flags: 1 << 6,
+                allowed_mentions: []
+            }
+        });
+
         if (global.additionalTag) {
             queryAttrs['work_search%5Bother_tag_names%5D'] = global.additionalTag;
         }
 
         const worksUrl = makeWorksUrl(global.seasonTag);
         const { dom, randomWorkUrl } = await searchWorkPage(worksUrl, queryAttrs);
+
+        await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${message.token}/messages/@original`, {
+            headers: { 'Content-Type': 'application/json' },
+            method: "PATCH",
+            body: JSON.stringify({
+                content: `Нашел работу ${randomWorkUrl}`
+            })
+        });
 
         const { fandom, title, downloadLink, summary } = await getWorkData(dom);
         const randomParagraphText = getRandomParagraph(dom).slice(0, 900);
@@ -163,12 +182,14 @@ app.post('/discord', async (_req, res) => {
             name: 'Видео',
             value: otherLinks.join('\n'),
         });
-        res.status(200).send({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
+
+        await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${message.token}`, {
+            headers: { 'Content-Type': 'application/json' },
+            method: "post",
+            body: JSON.stringify({
                 embeds: [embed]
-            }
-        })
+            })
+        });
     } else {
         res.status(400).send({ error: "Unknown Type" });
     }
