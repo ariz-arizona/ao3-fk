@@ -111,7 +111,7 @@ app.all('/random/:token', async (_req, res) => {
     res.sendStatus(200)
 })
 
-app.post('/discord', async (_req, res) => {
+app.post('/discord', async (_req, res, next) => {
     const signature = _req.headers['x-signature-ed25519'];
     const timestamp = _req.headers['x-signature-timestamp'];
     const isValidRequest = verifyKey(
@@ -133,13 +133,15 @@ app.post('/discord', async (_req, res) => {
         });
     } else if (message.type === InteractionType.APPLICATION_COMMAND || message.type === InteractionType.APPLICATION_COMMAND_AUTOCOMPLETE) {
         try {
-            fetch(`https://${_req.headers.host}/random/${message.token}`, { type: 'post' });
+            // fetch(`https://${_req.headers.host}/random/${message.token}`, { type: 'post' });
             res.status(200).send({
                 type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                 data: {
+                    flags: 1<<6,
                     content: `Начинаю искать случайную работу`
                 }
-            })
+            });
+            next();
 
         } catch (error) {
             await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${message.token}`, {
@@ -155,6 +157,11 @@ app.post('/discord', async (_req, res) => {
     } else {
         res.status(400).send({ error: "Unknown Type" });
     }
+});
+
+app.post('/discord', async (_req, res,) => {
+    const message = _req.body;
+    await makeWorkDiscord(message.token);
 });
 
 app.listen(APP_PORT, () => {

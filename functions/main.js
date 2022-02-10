@@ -353,9 +353,9 @@ const makeWorkDiscord = async (token) => {
     const queryAttrs = {
         // 'work_search%5Bwords_to%5D': 100
     }
-    await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${token}`, {
+    await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${token}/messages/@original`, {
         headers: { 'Content-Type': 'application/json' },
-        method: "post",
+        method: "PATCH",
         body: JSON.stringify({
             content: `Начинаю искать случайную работу по тегам ${[global.additionalTag, global.seasonTag].join(', ')}`
         })
