@@ -350,17 +350,16 @@ const onCallbackQuery = async (callbackQuery) => {
     return bot.answerCallbackQuery(callbackQuery.id);
 }
 
-const makeWorkDiscord = async (token) => {
+const makeWorkDiscord = async (token, userId) => {
     try {
 
         const queryAttrs = {
             // 'work_search%5Bwords_to%5D': 100
         }
-        await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${token}`, {
+        await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${token}/messages/@original`, {
             headers: { 'Content-Type': 'application/json' },
-            method: "post",
+            method: "PATCH",
             body: JSON.stringify({
-                flags: 1 << 6,
                 content: `Начинаю искать случайную работу по тегам ${[global.additionalTag, global.seasonTag].join(', ')}`
             })
         })
@@ -429,6 +428,7 @@ const makeWorkDiscord = async (token) => {
             headers: { 'Content-Type': 'application/json' },
             method: "post",
             body: JSON.stringify({
+                content: `<@${userId}> спрашивал, и я нашел ответ:`,
                 embeds: [embed]
             })
         })

@@ -88,7 +88,7 @@ app.post(`/callback`, async (_req, res) => {
     res.sendStatus(200);
 });
 
-app.all('/random/:token', async (_req, res) => {
+app.all('/random/:token/:userId', async (_req, res) => {
     // const signature = _req.headers['x-signature-ed25519'];
     // const timestamp = _req.headers['x-signature-timestamp'];
     // const isValidRequest = verifyKey(
@@ -102,12 +102,12 @@ app.all('/random/:token', async (_req, res) => {
     //     return res.status(401).send({ error: 'Bad request signature ' });
     // }
 
-    const { token } = _req.params;
+    const { token, userId } = _req.params;
     if (!token) {
         return;
     }
 
-    await makeWorkDiscord(token);
+    await makeWorkDiscord(token, userId);
     res.sendStatus(200)
 })
 
@@ -133,8 +133,8 @@ app.post('/discord', async (_req, res) => {
         });
     } else if (message.type === InteractionType.APPLICATION_COMMAND || message.type === InteractionType.APPLICATION_COMMAND_AUTOCOMPLETE) {
         try {
-            fetch(`https://${_req.headers.host}/random/${message.token}`, { type: 'post' });
-
+            fetch(`https://${_req.headers.host}/random/${message.token}/${message.user.id}`, { type: 'post' });
+// console.log(message);
             await new Promise(resolve => setTimeout(resolve, 200));
 
             res.status(200).send({
