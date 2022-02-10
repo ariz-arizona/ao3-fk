@@ -428,7 +428,7 @@ const makeWorkDiscord = async (token, userId) => {
             headers: { 'Content-Type': 'application/json' },
             method: "post",
             body: JSON.stringify({
-                content: `<@${userId}> спрашивал, и я нашел ответ:`,
+                content: userId ? `<@${userId}> спрашивал, и я нашел ответ:` : '',
                 embeds: [embed]
             })
         })
