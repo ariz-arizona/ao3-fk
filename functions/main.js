@@ -429,6 +429,8 @@ const makeWorkDiscord = async (token) => {
             embeds: [embed]
         })
     });
+
+    return true
 }
 
 module.exports = { set, cit, pic, collection, onCallbackQuery, makeWorkDiscord }
