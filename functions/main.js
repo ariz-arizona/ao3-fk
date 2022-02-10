@@ -361,7 +361,12 @@ const makeWorkDiscord = async (token) => {
             content: `Начинаю искать случайную работу по тегам ${[global.additionalTag, global.seasonTag].join(', ')}`
         })
     }).then(response => response.json())
-    .then(data => console.log(data));
+    .then(result => {
+      console.log('Success:', result);
+    })
+    .catch(error => {
+      console.error('Error:', error);
+    })
 
     if (global.additionalTag) {
         queryAttrs['work_search%5Bother_tag_names%5D'] = global.additionalTag;
@@ -376,7 +381,12 @@ const makeWorkDiscord = async (token) => {
             content: `Нашел работу ${randomWorkUrl}`
         })
     }).then(response => response.json())
-    .then(data => console.log(data));
+    .then(result => {
+      console.log('Success:', result);
+    })
+    .catch(error => {
+      console.error('Error:', error);
+    })
 
     const { fandom, title, downloadLink, summary } = await getWorkData(dom);
     const randomParagraphText = getRandomParagraph(dom).slice(0, 900);
@@ -430,6 +440,12 @@ const makeWorkDiscord = async (token) => {
         body: JSON.stringify({
             embeds: [embed]
         })
+    }).then(response => response.json())
+    .then(result => {
+      console.log('Success:', result);
+    })
+    .catch(error => {
+      console.error('Error:', error);
     });
 
     return true
