@@ -1,4 +1,5 @@
-const fetch = require('cross-fetch');
+// const fetch = require('cross-fetch');
+const fetch = require('@vercel/fetch')(require('cross-fetch'));
 
 const getRandomInt = (min, max) => {
     min = Math.ceil(min);

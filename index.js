@@ -1,13 +1,13 @@
 require('dotenv').config({ path: 'dev.env' })
 const TelegramBot = require('node-telegram-bot-api');
 const express = require('express');
-const fetch = require('cross-fetch');
+// const fetch = require('cross-fetch');
+const fetch = require('@vercel/fetch')(require('cross-fetch'));
 const { InteractionType, InteractionResponseType, verifyKey } = require('discord-interactions');
 
 const { fkTagYears, winterFkTag, ao3Url } = require('./constants');
 const { set, cit, pic, collection, onCallbackQuery, makeWorkDiscord } = require('./functions/main');
 const { showError } = require('./functions/func');
-const { sendStatus } = require('express/lib/response');
 
 const { BOT_TOKEN, CURRENT_HOST, DISCORD_APPLICATION_ID } = process.env;
 //todo port в переменные среды
@@ -161,7 +161,7 @@ app.post('/discord', async (_req, res, next) => {
 
 app.post('/discord', async (_req, res,) => {
     const message = _req.body;
-    console.log(message)
+    // console.log(message)
     await makeWorkDiscord(message.token);
     res.status(200)
 });
