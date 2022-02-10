@@ -135,6 +135,8 @@ app.post('/discord', async (_req, res) => {
         try {
             fetch(`https://${_req.headers.host}/random/${message.token}`, { type: 'post' });
 
+            await new Promise(resolve => setTimeout(resolve, 200));
+
             res.status(200).send({
                 type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                 data: {
