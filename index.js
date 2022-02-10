@@ -133,7 +133,7 @@ app.post('/discord', async (_req, res) => {
         });
     } else if (message.type === InteractionType.APPLICATION_COMMAND || message.type === InteractionType.APPLICATION_COMMAND_AUTOCOMPLETE) {
         try {
-            const userId = message.user ? message.user.id : message.member.user.id;
+            const userId = message.guild_id ? message.member.user.id : message.user.id;
             fetch(`https://${_req.headers.host}/random/${message.token}/${userId}`, { type: 'post' });
 
             await new Promise(resolve => setTimeout(resolve, 200));
