@@ -350,105 +350,92 @@ const onCallbackQuery = async (callbackQuery) => {
 }
 
 const makeWorkDiscord = async (token) => {
-    const queryAttrs = {
-        // 'work_search%5Bwords_to%5D': 100
-    }
-    await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${token}`, {
-        headers: { 'Content-Type': 'application/json' },
-        method: "post",
-        body: JSON.stringify({
-            flags: 1<<6,
-            content: `Начинаю искать случайную работу по тегам ${[global.additionalTag, global.seasonTag].join(', ')}`
+    try {
+
+        const queryAttrs = {
+            // 'work_search%5Bwords_to%5D': 100
+        }
+        await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${token}`, {
+            headers: { 'Content-Type': 'application/json' },
+            method: "post",
+            body: JSON.stringify({
+                flags: 1 << 6,
+                content: `Начинаю искать случайную работу по тегам ${[global.additionalTag, global.seasonTag].join(', ')}`
+            })
         })
-    }).then(response => response.json())
-    .then(result => {
-      console.log('Success:', result);
-    })
-    .catch(error => {
-      console.error('Error:', error);
-    })
 
-    if (global.additionalTag) {
-        queryAttrs['work_search%5Bother_tag_names%5D'] = global.additionalTag;
-    }
-    const worksUrl = makeWorksUrl(global.seasonTag);
-    const { dom, randomWorkUrl } = await searchWorkPage(worksUrl, queryAttrs);
+        if (global.additionalTag) {
+            queryAttrs['work_search%5Bother_tag_names%5D'] = global.additionalTag;
+        }
+        const worksUrl = makeWorksUrl(global.seasonTag);
+        const { dom, randomWorkUrl } = await searchWorkPage(worksUrl, queryAttrs);
 
-    await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${token}/messages/@original`, {
-        headers: { 'Content-Type': 'application/json' },
-        method: "PATCH",
-        body: JSON.stringify({
-            content: `Нашел работу ${randomWorkUrl}`
+        await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${token}/messages/@original`, {
+            headers: { 'Content-Type': 'application/json' },
+            method: "PATCH",
+            body: JSON.stringify({
+                content: `Нашел работу ${randomWorkUrl}`
+            })
         })
-    }).then(response => response.json())
-    .then(result => {
-      console.log('Success:', result);
-    })
-    .catch(error => {
-      console.error('Error:', error);
-    })
 
-    const { fandom, title, downloadLink, summary } = await getWorkData(dom);
-    const randomParagraphText = getRandomParagraph(dom).slice(0, 900);
-    const { media, otherLinks } = getWorkImages(dom);
-    const images = [];
-    media.map(el => {
-        el.map(img => {
-            images.push(img.media)
+        const { fandom, title, downloadLink, summary } = await getWorkData(dom);
+        const randomParagraphText = getRandomParagraph(dom).slice(0, 900);
+        const { media, otherLinks } = getWorkImages(dom);
+        const images = [];
+        media.map(el => {
+            el.map(img => {
+                images.push(img.media)
+            })
         })
-    })
 
-    const embed = {
-        type: 'rich',
-        title: title,
-        fandom: fandom,
-        url: `${ao3Url}${randomWorkUrl}`,
-        fields: [
-            {
-                name: 'Фандом',
-                value: fandom,
-            },
-            {
-                name: 'Ссылка для скачивания',
-                value: `${ao3Url}${downloadLink}`,
-            },
-        ],
-    }
-    if (randomParagraphText) embed.fields.push({
-        name: 'Случайный абзац',
-        value: randomParagraphText
-    });
-    if (summary) embed.fields.push({
-        name: 'Саммари',
-        value: summary,
-    });
-    if (images.length) {
-        embed.image = { url: images[0] };
-        embed.fields.push({
-            name: 'Картинки',
-            value: images.join('\n'),
+        const embed = {
+            type: 'rich',
+            title: title,
+            fandom: fandom,
+            url: `${ao3Url}${randomWorkUrl}`,
+            fields: [
+                {
+                    name: 'Фандом',
+                    value: fandom,
+                },
+                {
+                    name: 'Ссылка для скачивания',
+                    value: `${ao3Url}${downloadLink}`,
+                },
+            ],
+        }
+        if (randomParagraphText) embed.fields.push({
+            name: 'Случайный абзац',
+            value: randomParagraphText
         });
-    }
-    if (otherLinks.length) embed.fields.push({
-        name: 'Видео',
-        value: otherLinks.join('\n'),
-    });
+        if (summary) embed.fields.push({
+            name: 'Саммари',
+            value: summary,
+        });
+        if (images.length) {
+            embed.image = { url: images[0] };
+            embed.fields.push({
+                name: 'Картинки',
+                value: images.join('\n'),
+            });
+        }
+        if (otherLinks.length) embed.fields.push({
+            name: 'Видео',
+            value: otherLinks.join('\n'),
+        });
 
-    await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${token}`, {
-        headers: { 'Content-Type': 'application/json' },
-        method: "post",
-        body: JSON.stringify({
-            embeds: [embed]
+        await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${token}`, {
+            headers: { 'Content-Type': 'application/json' },
+            method: "post",
+            body: JSON.stringify({
+                embeds: [embed]
+            })
         })
-    }).then(response => response.json())
-    .then(result => {
-      console.log('Success:', result);
-    })
-    .catch(error => {
-      console.error('Error:', error);
-    });
 
-    return true
+        return true;
+    } catch (error) {
+        console.log(error)
+    }
 }
 
 module.exports = { set, cit, pic, collection, onCallbackQuery, makeWorkDiscord }
