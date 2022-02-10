@@ -134,34 +134,14 @@ app.post('/discord', async (_req, res) => {
     } else if (message.type === InteractionType.APPLICATION_COMMAND || message.type === InteractionType.APPLICATION_COMMAND_AUTOCOMPLETE) {
         try {
             fetch(`https://${_req.headers.host}/random/${message.token}`, { type: 'post' });
-            // const origEnd = res.end;
-            // res.end = async function newEnd(){
-            //     await makeWorkDiscord(message.token);
-            //     return origEnd.call();
-            // }
-            // console.log('ee')
-            // await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${message.token}`, {
-            //     headers: { 'Content-Type': 'application/json' },
-            //     method: "post",
-            //     body: JSON.stringify({
-            //         flags: 1 << 6,
-            //         content: `Начинаю искать случайную работу`
-            //     })
-            // })
-            // console.log('rr')
 
-            // await makeWorkDiscord(message.token);
             res.status(200).send({
                 type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                 data: {
-                    flags: 1<<6,
-                    content: `wewe`
+                    flags: 1 << 6,
+                    content: `Начинаю искать работу`
                 }
             });
-            // console.log('tt')
-            // res.sendStatus(200)
-            // next();
-
         } catch (error) {
             await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${message.token}`, {
                 headers: { 'Content-Type': 'application/json' },
@@ -178,15 +158,6 @@ app.post('/discord', async (_req, res) => {
     }
 });
 
-// app.post('/discord', async (_req, res,) => {
-//     const message = _req.body;
-//     // console.log(message)
-//     await makeWorkDiscord(message.token);
-//     res.status(200)
-// });
-
 app.listen(APP_PORT, () => {
     console.log(`listening on ${APP_PORT}`)
 });
-
-// discord();
