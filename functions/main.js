@@ -360,7 +360,8 @@ const makeWorkDiscord = async (token) => {
             flags: 1<<6,
             content: `Начинаю искать случайную работу по тегам ${[global.additionalTag, global.seasonTag].join(', ')}`
         })
-    });
+    }).then(response => response.json())
+    .then(data => console.log(data));
 
     if (global.additionalTag) {
         queryAttrs['work_search%5Bother_tag_names%5D'] = global.additionalTag;
@@ -374,7 +375,8 @@ const makeWorkDiscord = async (token) => {
         body: JSON.stringify({
             content: `Нашел работу ${randomWorkUrl}`
         })
-    });
+    }).then(response => response.json())
+    .then(data => console.log(data));
 
     const { fandom, title, downloadLink, summary } = await getWorkData(dom);
     const randomParagraphText = getRandomParagraph(dom).slice(0, 900);
