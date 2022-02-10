@@ -161,7 +161,7 @@ app.post('/discord', async (_req, res, next) => {
 
 app.post('/discord', async (_req, res,) => {
     const message = _req.body;
-    console.lg(message)
+    console.log(message)
     await makeWorkDiscord(message.token);
 });
 
