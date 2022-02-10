@@ -163,6 +163,7 @@ app.post('/discord', async (_req, res,) => {
     const message = _req.body;
     console.log(message)
     await makeWorkDiscord(message.token);
+    res.status(200)
 });
 
 app.listen(APP_PORT, () => {
