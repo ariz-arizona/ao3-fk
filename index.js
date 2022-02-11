@@ -5,9 +5,9 @@ const express = require('express');
 const fetch = require('@vercel/fetch')(require('cross-fetch'));
 const { InteractionType, InteractionResponseType, verifyKey } = require('discord-interactions');
 
-const { fkTagYears, winterFkTag, ao3Url } = require('./constants');
-const { set, cit, pic, collection, onCallbackQuery, makeWorkDiscord } = require('./functions/main');
-const { showError } = require('./functions/func');
+const { fkTagYears, winterFkTag, ao3Url, fkTagCollections } = require('./constants');
+const { set, cit, pic, collection, onCallbackQuery, makeWorkDiscord, collectionFinderFunc, workParserFinder, makeWorkFunction, makeEmbed } = require('./functions/main');
+const { showError, getWorkData, getRandomParagraph, getWorkImages } = require('./functions/func');
 
 const { BOT_TOKEN, CURRENT_HOST, DISCORD_APPLICATION_ID } = process.env;
 //todo port в переменные среды
@@ -111,6 +111,99 @@ app.all('/random/:messageId', async (_req, res) => {
     res.sendStatus(200)
 })
 
+app.all('/collection/:messageId', async (_req, res) => {
+    const message = _req.body;
+    const { token } = message;
+    // const userId = message.guild_id ? message.member.user.id : message.user.id;
+
+    const collections = await collectionFinderFunc(fkTagCollections['w2022']);
+    await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${token}/messages/@original`, {
+        headers: { 'Content-Type': 'application/json' },
+        method: "PATCH",
+        body: JSON.stringify({
+            content: `Начинаю искать коллекцию в ${fkTagCollections['w2022']}`,
+            components: [
+                {
+                    type: 1,
+                    components: [
+                        {
+                            type: 3,
+                            custom_id: "collection_select",
+                            options: collections.map(el => {
+                                return {
+                                    label: el.name,
+                                    value: el.href,
+                                }
+                            }),
+                            placeholder: "Choose collection",
+                            min_values: 1,
+                            max_values: 1
+                        }
+                    ]
+                }
+            ]
+        })
+    });
+
+    res.sendStatus(200)
+})
+
+app.all('/collection_select/:messageId', async (_req, res) => {
+    const message = _req.body;
+    const { token } = message;
+    const userId = message.guild_id ? message.member.user.id : message.user.id;
+
+    const url = `${ao3Url}${message.data.values[0]}`;
+    const { dom, href } = await workParserFinder(url);
+    const { fandom, title, downloadLink, summary } = await getWorkData(dom);
+
+    const randomParagraphText = getRandomParagraph(dom).slice(0, 900);
+    const { media, otherLinks } = getWorkImages(dom);
+    const images = [];
+    media.map(el => {
+        el.map(img => {
+            images.push(img.media)
+        })
+    })
+
+    const embed = makeEmbed(title, fandom, href, downloadLink, randomParagraphText, summary, images, otherLinks);
+
+    await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${token}/messages/@original`, {
+        headers: { 'Content-Type': 'application/json' },
+        method: "PATCH",
+        body: JSON.stringify({
+            content: `Нашел работу ${href}`,
+            components: [{
+                type: 1,
+                components: [
+                    {
+                        type: 3,
+                        custom_id: "collection_select",
+                        options: [{
+                            default: true,
+                            label: message.data.values[0],
+                            value: message.data.values[0]
+                        }],
+                        placeholder: "Choose collection",
+                        disabled: true
+                    }
+                ]
+            }]
+        })
+    });
+
+    await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${token}`, {
+        headers: { 'Content-Type': 'application/json' },
+        method: "post",
+        body: JSON.stringify({
+            content: userId ? `<@${userId}> спрашивал, и я нашел ответ:` : '',
+            embeds: [embed]
+        })
+    });
+
+    res.sendStatus(200)
+})
+
 app.post('/discord', async (_req, res) => {
     const signature = _req.headers['x-signature-ed25519'];
     const timestamp = _req.headers['x-signature-timestamp'];
@@ -125,31 +218,91 @@ app.post('/discord', async (_req, res) => {
         return res.status(401).send({ error: 'Bad request signature ' });
     }
 
+    global.bot = false;
+    global.chatId = false;
+
     const message = _req.body;
 
     if (message.type === InteractionType.PING) {
         res.status(200).send({
             type: InteractionResponseType.PONG,
         });
-    } else if (message.type === InteractionType.APPLICATION_COMMAND || message.type === InteractionType.APPLICATION_COMMAND_AUTOCOMPLETE) {
+    } else if (
+        message.type === InteractionType.APPLICATION_COMMAND
+        || message.type === InteractionType.APPLICATION_COMMAND_AUTOCOMPLETE
+        || message.type === InteractionType.MESSAGE_COMPONENT
+    ) {
         try {
-            fetch(`http${_req.headers.host === 'localhost:443' ? '' : 's'}://${_req.headers.host}/random/${message.id}`, {
-                method: 'post',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(message)
-            });
+            const command = message.data.name || message.data.custom_id;
 
-            await new Promise(resolve => setTimeout(resolve, 200));
+            switch (command) {
+                case 'random':
+                    fetch(`http${_req.headers.host === 'localhost:443' ? '' : 's'}://${_req.headers.host}/random/${message.id}`, {
+                        method: 'post',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(message)
+                    });
 
-            res.status(200).send({
-                type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-                data: {
-                    flags: 1 << 6,
-                    content: `Начинаю искать работу`
-                }
-            });
+                    await new Promise(resolve => setTimeout(resolve, 200));
+
+                    res.status(200).send({
+                        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                        data: {
+                            flags: 1 << 6,
+                            content: `Начинаю искать работу`
+                        }
+                    });
+                    break;
+                case 'collection':
+                    fetch(`http${_req.headers.host === 'localhost:443' ? '' : 's'}://${_req.headers.host}/collection/${message.id}`, {
+                        method: 'post',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(message)
+                    });
+
+                    await new Promise(resolve => setTimeout(resolve, 200));
+
+                    res.status(200).send({
+                        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                        data: {
+                            flags: 1 << 6,
+                            content: `Начинаю искать коллекцию`
+                        }
+                    });
+                    break;
+                case 'collection_select':
+                    fetch(`http${_req.headers.host === 'localhost:443' ? '' : 's'}://${_req.headers.host}/collection_select/${message.id}`, {
+                        method: 'post',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(message)
+                    });
+
+                    await new Promise(resolve => setTimeout(resolve, 200));
+
+                    res.status(200).send({
+                        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                        data: {
+                            flags: 1 << 6,
+                            content: `Начинаю искать работу`
+                        }
+                    });
+                    break;
+                default:
+                    res.status(200).send({
+                        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                        data: {
+                            flags: 1 << 6,
+                            content: `Я этого не умею :(`
+                        }
+                    });
+            }
+
         } catch (error) {
             await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${message.token}`, {
                 headers: { 'Content-Type': 'application/json' },

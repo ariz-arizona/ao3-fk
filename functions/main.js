@@ -177,7 +177,7 @@ const collection = async () => {
     return true;
 }
 
-const collectionFinder = async (collection) => {
+const collectionFinderFunc = async (collection) => {
     const url = `${ao3Url}/collections/${collection}/collections`;
 
     techMsg('Собираю список коллекций', true);
@@ -200,6 +200,14 @@ const collectionFinder = async (collection) => {
         }
     });
 
+    return links;
+}
+
+const collectionFinder = async (collection) => {
+    const chatId = global.chatId;
+
+    const links = await collectionFinderFunc(collection);
+
     linksChunks = array_chunks(links, 2);
     const keyboard = [];
     linksChunks.map(el => {
@@ -219,7 +227,7 @@ const collectionFinder = async (collection) => {
     return true;
 }
 
-const workParser = async (url) => {
+const workParserFinder = async (url) => {
     let content, dom, queryAttrs;
 
     techMsg('Открываю коллекцию', true);
@@ -253,6 +261,12 @@ const workParser = async (url) => {
     };
     content = await loadPage(`${ao3Url}${href}${makeQueryString(queryAttrs)}`);
     dom = HTMLParser.parse(content);
+
+    return { dom, href };
+}
+
+const workParser = async (dom, href) => {
+    const chatId = global.chatId;
 
     const { fandom, title, downloadLink, summary } = await getWorkData(dom);
     const text = makeWorkAnswer(title, fandom, summary);
@@ -343,8 +357,9 @@ const onCallbackQuery = async (callbackQuery) => {
     if (action.indexOf('link_') === 0) {
         const vars = action.replace('link_', '');
         const url = `${ao3Url}${vars}`;
+        const { dom, href } = await workParserFinder(url);
 
-        await workParser(url);
+        await workParser(dom, href);
     }
 
     return bot.answerCallbackQuery(callbackQuery.id);
@@ -352,7 +367,6 @@ const onCallbackQuery = async (callbackQuery) => {
 
 const makeWorkDiscord = async (token, userId) => {
     try {
-
         const queryAttrs = {
             // 'work_search%5Bwords_to%5D': 100
         }
@@ -368,70 +382,7 @@ const makeWorkDiscord = async (token, userId) => {
             queryAttrs['work_search%5Bother_tag_names%5D'] = global.additionalTag;
         }
         const worksUrl = makeWorksUrl(global.seasonTag);
-        const { dom, randomWorkUrl } = await searchWorkPage(worksUrl, queryAttrs);
-
-        await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${token}/messages/@original`, {
-            headers: { 'Content-Type': 'application/json' },
-            method: "PATCH",
-            body: JSON.stringify({
-                content: `Нашел работу ${randomWorkUrl}`
-            })
-        })
-
-        const { fandom, title, downloadLink, summary } = await getWorkData(dom);
-        const randomParagraphText = getRandomParagraph(dom).slice(0, 900);
-        const { media, otherLinks } = getWorkImages(dom);
-        const images = [];
-        media.map(el => {
-            el.map(img => {
-                images.push(img.media)
-            })
-        })
-
-        const embed = {
-            type: 'rich',
-            title: title,
-            fandom: fandom,
-            url: `${ao3Url}${randomWorkUrl}`,
-            fields: [
-                {
-                    name: 'Фандом',
-                    value: fandom,
-                },
-                {
-                    name: 'Ссылка для скачивания',
-                    value: `${ao3Url}${downloadLink}`,
-                },
-            ],
-        }
-        if (randomParagraphText) embed.fields.push({
-            name: 'Случайный абзац',
-            value: randomParagraphText
-        });
-        if (summary) embed.fields.push({
-            name: 'Саммари',
-            value: summary,
-        });
-        if (images.length) {
-            embed.image = { url: images[0] };
-            embed.fields.push({
-                name: 'Картинки',
-                value: images.join('\n'),
-            });
-        }
-        if (otherLinks.length) embed.fields.push({
-            name: 'Видео',
-            value: otherLinks.join('\n'),
-        });
-
-        await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${token}`, {
-            headers: { 'Content-Type': 'application/json' },
-            method: "post",
-            body: JSON.stringify({
-                content: userId ? `<@${userId}> спрашивал, и я нашел ответ:` : '',
-                embeds: [embed]
-            })
-        })
+        await makeWorkFunction(worksUrl, queryAttrs, token, userId);
 
         return true;
     } catch (error) {
@@ -439,4 +390,82 @@ const makeWorkDiscord = async (token, userId) => {
     }
 }
 
-module.exports = { set, cit, pic, collection, onCallbackQuery, makeWorkDiscord }
+const makeEmbed = (title, fandom, randomWorkUrl, downloadLink, randomParagraphText, summary, images, otherLinks) => {
+    const embed = {
+        type: 'rich',
+        title: title,
+        url: `${ao3Url}${randomWorkUrl}`,
+        fields: [
+            {
+                name: 'Фандом',
+                value: fandom,
+            },
+            {
+                name: 'Не забудьте про кудос',
+                value: `${ao3Url}${randomWorkUrl}#new_kudo`,
+            },
+            // {
+            //     name: 'Ссылка для скачивания',
+            //     value: `${ao3Url}${downloadLink}`,
+            // },
+        ],
+    }
+    if (randomParagraphText) embed.fields.push({
+        name: 'Случайный абзац',
+        value: randomParagraphText
+    });
+    if (summary) embed.fields.push({
+        name: 'Саммари',
+        value: summary,
+    });
+    if (images.length) {
+        embed.image = { url: images[0] };
+        embed.fields.push({
+            name: 'Картинки',
+            value: images.join('\n'),
+        });
+    }
+    if (otherLinks.length) embed.fields.push({
+        name: 'Видео',
+        value: otherLinks.join('\n'),
+    });
+
+    return embed;
+}
+
+const makeWorkFunction = async (worksUrl, queryAttrs, token, userId) => {
+    const { dom, randomWorkUrl } = await searchWorkPage(worksUrl, queryAttrs);
+
+    await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${token}/messages/@original`, {
+        headers: { 'Content-Type': 'application/json' },
+        method: "PATCH",
+        body: JSON.stringify({
+            content: `Нашел работу ${randomWorkUrl}`
+        })
+    })
+
+    const { fandom, title, downloadLink, summary } = await getWorkData(dom);
+    const randomParagraphText = getRandomParagraph(dom).slice(0, 900);
+    const { media, otherLinks } = getWorkImages(dom);
+    const images = [];
+    media.map(el => {
+        el.map(img => {
+            images.push(img.media)
+        })
+    })
+
+    const embed = makeEmbed(title, fandom, randomWorkUrl, downloadLink, randomParagraphText, summary, images, otherLinks);
+
+    await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${token}`, {
+        headers: { 'Content-Type': 'application/json' },
+        method: "post",
+        body: JSON.stringify({
+            content: userId ? `<@${userId}> спрашивал, и я нашел ответ:` : '',
+            embeds: [embed]
+        })
+    });
+
+    return true;
+}
+
+module.exports = { set, cit, pic, collection, collectionFinderFunc, workParserFinder, onCallbackQuery, makeWorkDiscord, makeEmbed, makeWorkFunction }
