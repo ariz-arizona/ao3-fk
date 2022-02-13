@@ -169,7 +169,7 @@ app.all('/collection_select/:messageId', async (_req, res) => {
 
     const url = `${ao3Url}${message.data.values[0]}`;
     const { dom, href } = await workParserFinder(url);
-    const { fandom, title, downloadLink, summary } = await getWorkData(dom);
+    const { fandom, title, downloadLink, summary, author, tags } = await getWorkData(dom);
 
     const randomParagraphText = getRandomParagraph(dom).slice(0, 900);
     const { media, otherLinks } = getWorkImages(dom);
@@ -180,7 +180,7 @@ app.all('/collection_select/:messageId', async (_req, res) => {
         })
     })
 
-    const embed = makeEmbed(title, fandom, href, downloadLink, randomParagraphText, summary, images, otherLinks);
+    const embed = makeEmbed(title, fandom, href, downloadLink, randomParagraphText, summary, images, otherLinks, author, tags);
 
     await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${token}/messages/@original`, {
         headers: { 'Content-Type': 'application/json' },

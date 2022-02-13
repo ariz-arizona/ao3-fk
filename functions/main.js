@@ -390,7 +390,7 @@ const makeWorkDiscord = async (token, userId) => {
     }
 }
 
-const makeEmbed = (title, fandom, randomWorkUrl, downloadLink, randomParagraphText, summary, images, otherLinks) => {
+const makeEmbed = (title, fandom, randomWorkUrl, downloadLink, randomParagraphText, summary, images, otherLinks, author, tags) => {
     const embed = {
         type: 'rich',
         title: title,
@@ -410,6 +410,17 @@ const makeEmbed = (title, fandom, randomWorkUrl, downloadLink, randomParagraphTe
             // },
         ],
     }
+
+    if (author) embed.fields.push({
+        name: 'Автор',
+        value: author
+    });
+
+    if (tags && tags.length) embed.fields.push({
+        name: 'Тэги',
+        value: tags.join(', ')
+    });
+
     if (randomParagraphText) embed.fields.push({
         name: 'Случайный абзац',
         value: randomParagraphText
@@ -444,7 +455,7 @@ const makeWorkFunction = async (worksUrl, queryAttrs, token, userId) => {
         })
     })
 
-    const { fandom, title, downloadLink, summary } = await getWorkData(dom);
+    const { fandom, title, downloadLink, summary, author, tags } = await getWorkData(dom);
     const randomParagraphText = getRandomParagraph(dom).slice(0, 900);
     const { media, otherLinks } = getWorkImages(dom);
     const images = [];
@@ -454,7 +465,7 @@ const makeWorkFunction = async (worksUrl, queryAttrs, token, userId) => {
         })
     })
 
-    const embed = makeEmbed(title, fandom, randomWorkUrl, downloadLink, randomParagraphText, summary, images, otherLinks);
+    const embed = makeEmbed(title, fandom, randomWorkUrl, downloadLink, randomParagraphText, summary, images, otherLinks, author, tags);
 
     await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${token}`, {
         headers: { 'Content-Type': 'application/json' },

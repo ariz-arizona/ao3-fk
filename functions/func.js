@@ -52,8 +52,13 @@ const getWorkData = async (dom) => {
     const title = dom.querySelector('.title.heading') ? dom.querySelector('.title.heading').textContent.trim() : 'Заголовок не найден';
     const downloadLink = dom.querySelector('.download > ul > li:nth-child(2) > a') ? dom.querySelector('.download > ul > li:nth-child(2) > a').getAttribute('href') : null;
     const summary = dom.querySelector('.summary .userstuff') ? dom.querySelector('.summary .userstuff').textContent.trim() : '';
+    const author = dom.querySelector('a[rel="author"]') ? dom.querySelector('a[rel="author"]').textContent : '';
+    const tags = [];
+    dom.querySelectorAll('a.tag').forEach(el => {
+        if (el.textContent) tags.push(el.textContent)
+    });
 
-    return { fandom, title, downloadLink, summary }
+    return { fandom, title, downloadLink, summary, author, tags }
 }
 
 const makeWorkAnswer = (title, fandom, downloadLink, summary, randomWorkUrl) => {
