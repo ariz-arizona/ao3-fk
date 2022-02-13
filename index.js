@@ -8,6 +8,7 @@ const { InteractionType, InteractionResponseType, verifyKey } = require('discord
 const { fkTagYears, winterFkTag, ao3Url, fkTagCollections } = require('./constants');
 const { set, cit, pic, collection, onCallbackQuery, makeWorkDiscord, collectionFinderFunc, workParserFinder, makeWorkFunction, makeEmbed } = require('./functions/main');
 const { showError, getWorkData, getRandomParagraph, getWorkImages } = require('./functions/func');
+const { contentType } = require('express/lib/response');
 
 const { BOT_TOKEN, CURRENT_HOST, DISCORD_APPLICATION_ID } = process.env;
 //todo port в переменные среды
@@ -111,10 +112,16 @@ app.all('/random/:messageId', async (_req, res) => {
     res.sendStatus(200)
 })
 
+const collectionToken = {};
+
 app.all('/collection/:messageId', async (_req, res) => {
     const message = _req.body;
+    const { messageId } = _req.params;
     const { token } = message;
-    // const userId = message.guild_id ? message.member.user.id : message.user.id;
+
+    collectionToken[messageId] = token;
+
+    // console.log({ type: "api_collection", id: message.id, token })
 
     const collections = await collectionFinderFunc(fkTagCollections['w2022']);
     await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${token}/messages/@original`, {
@@ -133,6 +140,7 @@ app.all('/collection/:messageId', async (_req, res) => {
                                 return {
                                     label: el.name,
                                     value: el.href,
+                                    token
                                 }
                             }),
                             placeholder: "Choose collection",
@@ -150,8 +158,14 @@ app.all('/collection/:messageId', async (_req, res) => {
 
 app.all('/collection_select/:messageId', async (_req, res) => {
     const message = _req.body;
-    const { token } = message;
+    const { messageId } = _req.params;
+    // const { token } = message;
+    const token = collectionToken[messageId] || message.token;
+    delete collectionToken[messageId];
+
     const userId = message.guild_id ? message.member.user.id : message.user.id;
+
+    // console.log({ type: "api_collection_select", id: message.id, token })
 
     const url = `${ao3Url}${message.data.values[0]}`;
     const { dom, href } = await workParserFinder(url);
@@ -234,7 +248,7 @@ app.post('/discord', async (_req, res) => {
     ) {
         try {
             const command = message.data.name || message.data.custom_id;
-
+            // console.log({ command, data: message.data, id: message.id })
             switch (command) {
                 case 'random':
                     fetch(`http${_req.headers.host === 'localhost:443' ? '' : 's'}://${_req.headers.host}/random/${message.id}`, {
@@ -275,7 +289,7 @@ app.post('/discord', async (_req, res) => {
                     });
                     break;
                 case 'collection_select':
-                    fetch(`http${_req.headers.host === 'localhost:443' ? '' : 's'}://${_req.headers.host}/collection_select/${message.id}`, {
+                    fetch(`http${_req.headers.host === 'localhost:443' ? '' : 's'}://${_req.headers.host}/collection_select/${message.message.interaction.id}`, {
                         method: 'post',
                         headers: {
                             'Content-Type': 'application/json'
