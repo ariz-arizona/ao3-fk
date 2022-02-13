@@ -411,9 +411,9 @@ const makeEmbed = (title, fandom, randomWorkUrl, downloadLink, randomParagraphTe
         ],
     }
 
-    if (author) embed.fields.push({
+    if (author && author.length) embed.fields.push({
         name: 'Автор',
-        value: author
+        value: author.join(', ')
     });
 
     if (tags && tags.length) embed.fields.push({
