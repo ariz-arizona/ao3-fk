@@ -395,21 +395,18 @@ const makeEmbed = (title, fandom, randomWorkUrl, downloadLink, randomParagraphTe
         type: 'rich',
         title: title,
         url: `${ao3Url}${randomWorkUrl}`,
-        fields: [
-            {
-                name: 'Фандом',
-                value: fandom,
-            },
-            {
-                name: 'Не забудьте про кудос',
-                value: `${ao3Url}${randomWorkUrl}#new_kudo`,
-            },
-            // {
-            //     name: 'Ссылка для скачивания',
-            //     value: `${ao3Url}${downloadLink}`,
-            // },
-        ],
+        fields: [],
     }
+    
+    embed.fields.push({
+        name: 'Фандом',
+        value: fandom,
+    });
+
+    if (randomParagraphText) embed.fields.push({
+        name: 'Случайный абзац',
+        value: randomParagraphText
+    });
 
     if (author && author.length) embed.fields.push({
         name: 'Автор',
@@ -421,10 +418,6 @@ const makeEmbed = (title, fandom, randomWorkUrl, downloadLink, randomParagraphTe
         value: tags.join(', ')
     });
 
-    if (randomParagraphText) embed.fields.push({
-        name: 'Случайный абзац',
-        value: randomParagraphText
-    });
     if (summary) embed.fields.push({
         name: 'Саммари',
         value: summary,
@@ -439,6 +432,11 @@ const makeEmbed = (title, fandom, randomWorkUrl, downloadLink, randomParagraphTe
     if (otherLinks.length) embed.fields.push({
         name: 'Видео',
         value: otherLinks.join('\n'),
+    });
+
+    embed.fields.push({
+        name: 'Не забудьте про кудос',
+        value: `${ao3Url}${randomWorkUrl}#new_kudo`,
     });
 
     return embed;
