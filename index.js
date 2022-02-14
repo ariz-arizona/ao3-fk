@@ -1,14 +1,14 @@
 require('dotenv').config({ path: 'dev.env' })
 const TelegramBot = require('node-telegram-bot-api');
 const express = require('express');
-// const fetch = require('cross-fetch');
 const fetch = require('@vercel/fetch')(require('cross-fetch'));
 const { InteractionType, InteractionResponseType, verifyKey } = require('discord-interactions');
+const HTMLParser = require('node-html-parser');
 
 const { fkTagYears, winterFkTag, ao3Url, fkTagCollections } = require('./constants');
 const { set, cit, pic, collection, onCallbackQuery, makeWorkDiscord, collectionFinderFunc, workParserFinder, makeWorkFunction, makeEmbed } = require('./functions/main');
 const { showError, getWorkData, getRandomParagraph, getWorkImages } = require('./functions/func');
-const { contentType } = require('express/lib/response');
+const { makeQueryString, loadPage } = require('./functions/helpers');
 
 const { BOT_TOKEN, CURRENT_HOST, DISCORD_APPLICATION_ID } = process.env;
 //todo port в переменные среды
@@ -212,6 +212,62 @@ app.all('/collection_select/:messageId', async (_req, res) => {
     res.sendStatus(200)
 })
 
+app.all('/card_modal/:messageId', async (_req, res) => {
+    const message = _req.body;
+    // const { messageId } = _req.params;
+    const { token } = message;
+
+    // console.log({ type: "api_card_modal", id: message.id, token })
+
+    const components = message.data.components.map(el => el.components[0]);
+    const workId = components.find(el => el.custom_id === 'work_id') ? components.find(el => el.custom_id === 'work_id').value : null;
+    const review = components.find(el => el.custom_id === 'review') ? components.find(el => el.custom_id === 'review').value : null;
+
+    const url = `${ao3Url}/works/${workId}`;
+    try {        
+        const queryAttrs = {
+            'view_full_work': 'true',
+            'view_adult': 'true'
+        };
+        const content = await loadPage(`${url}${makeQueryString(queryAttrs)}`);
+        const dom = HTMLParser.parse(content);
+        const { fandom, title, downloadLink, summary, author, tags } = await getWorkData(dom);
+
+        const randomParagraphText = getRandomParagraph(dom).slice(0, 900);
+        const { media, otherLinks } = getWorkImages(dom);
+        const images = [];
+        media.map(el => {
+            el.map(img => {
+                images.push(img.media)
+            })
+        })
+
+        const embed = makeEmbed(title, fandom, `/works/${workId}`, downloadLink, randomParagraphText, summary, images, otherLinks, author, tags);
+
+        await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${token}`, {
+            headers: { 'Content-Type': 'application/json' },
+            method: "post",
+            body: JSON.stringify({
+                content: review || '',
+                embeds: [embed]
+            })
+        });
+    } catch (error) {
+        console.log(error)
+        await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${token}`, {
+            headers: { 'Content-Type': 'application/json' },
+            method: "post",
+            body: JSON.stringify({
+                content: `Я ничего не нашел :(`,
+            })
+        });
+    }
+
+    // console.log(message)
+
+    res.sendStatus(200)
+})
+
 app.post('/discord', async (_req, res) => {
     const signature = _req.headers['x-signature-ed25519'];
     const timestamp = _req.headers['x-signature-timestamp'];
@@ -239,10 +295,10 @@ app.post('/discord', async (_req, res) => {
         message.type === InteractionType.APPLICATION_COMMAND
         || message.type === InteractionType.APPLICATION_COMMAND_AUTOCOMPLETE
         || message.type === InteractionType.MESSAGE_COMPONENT
+        || 5
     ) {
         try {
             const command = message.data.name || message.data.custom_id;
-            // console.log({ command, data: message.data, id: message.id })
             switch (command) {
                 case 'random':
                     fetch(`http${_req.headers.host === 'localhost:443' ? '' : 's'}://${_req.headers.host}/random/${message.id}`, {
@@ -301,6 +357,66 @@ app.post('/discord', async (_req, res) => {
                         }
                     });
                     break;
+                case 'card':
+                    res.status(200).send({
+                        type: 9,
+                        data: {
+                            title: "My Card Modal",
+                            custom_id: "card_modal",
+                            components: [
+                                {
+                                    type: 1,
+                                    components: [
+                                        {
+                                            type: 4,
+                                            custom_id: "work_id",
+                                            label: "Work ID",
+                                            style: 1,
+                                            min_length: 1,
+                                            max_length: 400,
+                                            required: true
+                                        },
+                                    ]
+                                },
+                                {
+                                    type: 1,
+                                    components: [
+                                        {
+                                            type: 4,
+                                            custom_id: "review",
+                                            label: "Review",
+                                            style: 2,
+                                            min_length: 1,
+                                            max_length: 2000,
+                                            required: false
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    });
+                    break;
+
+                case 'card_modal':
+                    fetch(`http${_req.headers.host === 'localhost:443' ? '' : 's'}://${_req.headers.host}/card_modal/${message.id}`, {
+                        method: 'post',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(message)
+                    });
+
+                    await new Promise(resolve => setTimeout(resolve, 200));
+
+                    res.status(200).send({
+                        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                        data: {
+                            flags: 1 << 6,
+                            content: `Начинаю искать работу`
+                        }
+                    });
+                    break;
+
                 default:
                     res.status(200).send({
                         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
