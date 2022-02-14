@@ -412,7 +412,7 @@ const makeEmbed = (title, fandom, randomWorkUrl, downloadLink, randomParagraphTe
 
     if (tags && tags.length) embed.fields.push({
         name: 'Тэги',
-        value: tags.join(', ')
+        value: tags.join(', ').slice(0, 1000)
     });
 
     if (summary) embed.fields.push({
