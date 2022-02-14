@@ -101,7 +101,9 @@ app.all('/random/:messageId', async (_req, res) => {
     });
 
     const queryAttrs = {};
-    if (options.few_comments) queryAttrs['work_search%5Bcomments_count%5D'] = '%26lt%3B10&';
+    if (options.few_comments) queryAttrs['work_search%5Bcomments_count%5D'] = '<3';
+
+    if (options.zero_comments) queryAttrs['work_search%5Bcomments_count%5D'] = '<1';
 
     await makeWorkDiscord(token, userId, queryAttrs);
     res.sendStatus(200)

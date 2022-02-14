@@ -367,9 +367,6 @@ const onCallbackQuery = async (callbackQuery) => {
 
 const makeWorkDiscord = async (token, userId, queryAttrs = {}) => {
     try {
-        const queryAttrs = {
-            // 'work_search%5Bwords_to%5D': 100
-        }
         await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${token}/messages/@original`, {
             headers: { 'Content-Type': 'application/json' },
             method: "PATCH",

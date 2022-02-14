@@ -52,7 +52,7 @@ const getWorkData = async (dom) => {
     const title = dom.querySelector('.title.heading') ? dom.querySelector('.title.heading').textContent.trim() : 'Заголовок не найден';
     const downloadLink = dom.querySelector('.download > ul > li:nth-child(2) > a') ? dom.querySelector('.download > ul > li:nth-child(2) > a').getAttribute('href') : null;
     const summary = dom.querySelector('.summary .userstuff') ? dom.querySelector('.summary .userstuff').textContent.trim() : '';
-    
+
     const author = [];
     dom.querySelectorAll('a[rel="author"]').forEach(el => {
         if (el.textContent) author.push(el.textContent)
