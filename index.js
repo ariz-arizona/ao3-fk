@@ -90,25 +90,20 @@ app.post(`/callback`, async (_req, res) => {
 });
 
 app.all('/random/:messageId', async (_req, res) => {
-    // const signature = _req.headers['x-signature-ed25519'];
-    // const timestamp = _req.headers['x-signature-timestamp'];
-    // const isValidRequest = verifyKey(
-    //     _req.rawBody,
-    //     signature,
-    //     timestamp,
-    //     process.env.DISCORD_PUB_KEY
-    // );
-
-    // if (!isValidRequest) {
-    //     return res.status(401).send({ error: 'Bad request signature ' });
-    // }
-
     // const { messageId } = _req.params;
     const message = _req.body;
     const { token } = message;
     const userId = message.guild_id ? message.member.user.id : message.user.id;
 
-    await makeWorkDiscord(token, userId);
+    const options = {};
+    (message.data.options || []).forEach(element => {
+        options[element.name] = element.value;
+    });
+
+    const queryAttrs = {};
+    if (options.few_comments) queryAttrs['work_search%5Bcomments_count%5D'] = '%26lt%3B10&';
+
+    await makeWorkDiscord(token, userId, queryAttrs);
     res.sendStatus(200)
 })
 
@@ -159,7 +154,6 @@ app.all('/collection/:messageId', async (_req, res) => {
 app.all('/collection_select/:messageId', async (_req, res) => {
     const message = _req.body;
     const { messageId } = _req.params;
-    // const { token } = message;
     const token = collectionToken[messageId] || message.token;
     delete collectionToken[messageId];
 

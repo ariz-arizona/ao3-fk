@@ -365,7 +365,7 @@ const onCallbackQuery = async (callbackQuery) => {
     return bot.answerCallbackQuery(callbackQuery.id);
 }
 
-const makeWorkDiscord = async (token, userId) => {
+const makeWorkDiscord = async (token, userId, queryAttrs = {}) => {
     try {
         const queryAttrs = {
             // 'work_search%5Bwords_to%5D': 100
@@ -397,7 +397,7 @@ const makeEmbed = (title, fandom, randomWorkUrl, downloadLink, randomParagraphTe
         url: `${ao3Url}${randomWorkUrl}`,
         fields: [],
     }
-    
+
     embed.fields.push({
         name: 'Фандом',
         value: fandom,
