@@ -288,6 +288,7 @@ app.post('/discord', async (_req, res) => {
     global.chatId = false;
 
     const message = _req.body;
+    // console.log({headers:_req.headers, body: _req.body})
 
     if (message.type === InteractionType.PING) {
         res.status(200).send({
