@@ -383,11 +383,12 @@ const makeWorkDiscord = async (token, userId, queryAttrs = {}) => {
 
         return true;
     } catch (error) {
-        console.log(error)
+        console.log(error.message)
         let msg;
         switch (error.message) {
             case 'notfound':
-                msg = 'Я ничего не нашел :('
+                msg = 'Я ничего не нашел :(';
+                break;
             default:
                 msg = 'Ой! Что-то случилось! Может, попробуете еще раз?';
         }

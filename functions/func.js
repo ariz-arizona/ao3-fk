@@ -8,7 +8,7 @@ const searchWorkPage = async (worksUrl, queryAttrs) => {
     // const bot = global.bot;
     const chatId = global.chatId;
 
-    // console.log(`search work page ${chatId}`)
+    // console.log(`${worksUrl}${makeQueryString(queryAttrs)}`)
     let pageQuery = {};
     let content;
     let dom;
@@ -16,12 +16,15 @@ const searchWorkPage = async (worksUrl, queryAttrs) => {
     content = await loadPage(`${worksUrl}${makeQueryString(queryAttrs)}`);
     dom = HTMLParser.parse(content);
 
-    if (!dom.querySelector('.pagination li:nth-last-child(2) a')) {
+    if (dom.querySelectorAll('.work > li').length === 0) {
         throw new Error('notfound');
     }
 
-    const lastPageUrl = dom.querySelector('.pagination li:nth-last-child(2) a').getAttribute('href');
-    const searchParams = getSearchParametres(lastPageUrl);
+    let lastPageUrl;
+    if (dom.querySelector('.pagination li:nth-last-child(2) a')) {
+        lastPageUrl = dom.querySelector('.pagination li:nth-last-child(2) a').getAttribute('href');
+    }
+    const searchParams = dom.querySelector('.pagination li:nth-last-child(2) a') ? getSearchParametres(lastPageUrl) : queryAttrs;
     const randomPage = getRandomInt(1, searchParams.page);
 
     pageQuery = searchParams;
