@@ -101,9 +101,33 @@ app.all('/random/:messageId', async (_req, res) => {
     });
 
     const queryAttrs = {};
-    if (options.few_comments) queryAttrs['work_search%5Bcomments_count%5D'] = '<3';
+    if (options.comments_count) {
+        if (options.comments_count === 'few') {
+            queryAttrs['work_search%5Bcomments_count%5D'] = encodeURIComponent('<3');
+        } else if (options.comments_count === 'zero') {
+            queryAttrs['work_search%5Bcomments_count%5D'] = encodeURIComponent('<1');
+        }
+    }
 
-    if (options.zero_comments) queryAttrs['work_search%5Bcomments_count%5D'] = '<1';
+    if (options.kudos_count) {
+        if (options.kudos_count === 'few') {
+            queryAttrs['work_search%5Bkudos_count%5D'] = encodeURIComponent('<10');
+        } else if (options.kudos_count === 'zero') {
+            queryAttrs['work_search%5Bkudos_count%5D'] = encodeURIComponent('<1');
+        }
+    }
+
+    if (options.word_count) {
+        if (options.word_count === 'less') {
+            queryAttrs['work_search%5Bword_count%5D'] = encodeURIComponent('<100');
+        } else if (options.word_count === 'more') {
+            queryAttrs['work_search%5Bword_count%5D'] = encodeURIComponent('>100');
+        }
+    }
+
+    if (options.query) {
+        queryAttrs['work_search%5Bquery%5D'] = encodeURIComponent(options.query);
+    }
 
     await makeWorkDiscord(token, userId, queryAttrs);
     res.sendStatus(200)
@@ -226,7 +250,7 @@ app.all('/card_modal/:messageId', async (_req, res) => {
     const review = components.find(el => el.custom_id === 'review') ? components.find(el => el.custom_id === 'review').value : null;
 
     const url = `${ao3Url}/works/${workId}`;
-    try {        
+    try {
         const queryAttrs = {
             'view_full_work': 'true',
             'view_adult': 'true'

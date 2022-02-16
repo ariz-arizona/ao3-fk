@@ -384,6 +384,22 @@ const makeWorkDiscord = async (token, userId, queryAttrs = {}) => {
         return true;
     } catch (error) {
         console.log(error)
+        let msg;
+        switch (error.message) {
+            case 'notfound':
+                msg = 'Я ничего не нашел :('
+            default:
+                msg = 'Ой! Что-то случилось! Может, попробуете еще раз?';
+        }
+        await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${token}/messages/@original`, {
+            headers: { 'Content-Type': 'application/json' },
+            method: "PATCH",
+            body: JSON.stringify({
+                content: msg
+            })
+        });
+
+        return true
     }
 }
 
