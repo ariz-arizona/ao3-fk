@@ -88,6 +88,18 @@ app.post(`/callback`, async (_req, res) => {
 
     res.sendStatus(200);
 });
+app.all('/nude_random/:messageId/:timestamp', async (_req, res) => {
+    // const { messageId } = _req.params;
+    if (!_req.body.application_id) {
+        return;
+    }
+    const message = _req.body;
+    const { token } = message;
+    const userId = message.guild_id ? message.member.user.id : message.user.id;
+
+    await makeWorkDiscord(token, userId, {});
+    res.sendStatus(200)
+})
 
 app.all('/random/:messageId/:timestamp', async (_req, res) => {
     // const { messageId } = _req.params;
@@ -333,6 +345,25 @@ app.post('/discord', async (_req, res) => {
         try {
             const command = message.data.name || message.data.custom_id;
             switch (command) {
+                case 'nude_random':
+                    fetch(`http${_req.headers.host === 'localhost:443' ? '' : 's'}://${_req.headers.host}/nude_random/${message.id}/${timestamp}`, {
+                        method: 'post',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(message)
+                    });
+
+                    await new Promise(resolve => setTimeout(resolve, 200));
+
+                    res.status(200).send({
+                        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                        data: {
+                            flags: 1 << 6,
+                            content: `Начинаю искать работу`
+                        }
+                    });
+                    break;
                 case 'random':
                     fetch(`http${_req.headers.host === 'localhost:443' ? '' : 's'}://${_req.headers.host}/random/${message.id}/${timestamp}`, {
                         method: 'post',
