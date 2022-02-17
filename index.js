@@ -89,8 +89,11 @@ app.post(`/callback`, async (_req, res) => {
     res.sendStatus(200);
 });
 
-app.all('/random/:messageId', async (_req, res) => {
+app.all('/random/:messageId/:timestamp', async (_req, res) => {
     // const { messageId } = _req.params;
+    if (!_req.body.application_id) {
+        return;
+    }
     const message = _req.body;
     const { token } = message;
     const userId = message.guild_id ? message.member.user.id : message.user.id;
@@ -135,7 +138,10 @@ app.all('/random/:messageId', async (_req, res) => {
 
 const collectionToken = {};
 
-app.all('/collection/:messageId', async (_req, res) => {
+app.all('/collection/:messageId/:timestamp', async (_req, res) => {
+    if (!_req.body.application_id) {
+        return;
+    }
     const message = _req.body;
     const { messageId } = _req.params;
     const { token } = message;
@@ -328,7 +334,7 @@ app.post('/discord', async (_req, res) => {
             const command = message.data.name || message.data.custom_id;
             switch (command) {
                 case 'random':
-                    fetch(`http${_req.headers.host === 'localhost:443' ? '' : 's'}://${_req.headers.host}/random/${message.id}`, {
+                    fetch(`http${_req.headers.host === 'localhost:443' ? '' : 's'}://${_req.headers.host}/random/${message.id}/${timestamp}`, {
                         method: 'post',
                         headers: {
                             'Content-Type': 'application/json'
@@ -347,7 +353,7 @@ app.post('/discord', async (_req, res) => {
                     });
                     break;
                 case 'collection':
-                    fetch(`http${_req.headers.host === 'localhost:443' ? '' : 's'}://${_req.headers.host}/collection/${message.id}`, {
+                    fetch(`http${_req.headers.host === 'localhost:443' ? '' : 's'}://${_req.headers.host}/collection/${message.id}/${timestamp}`, {
                         method: 'post',
                         headers: {
                             'Content-Type': 'application/json'
