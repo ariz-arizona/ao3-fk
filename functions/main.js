@@ -5,7 +5,7 @@ const fetch = require('@vercel/fetch')(require('cross-fetch'));
 
 const { getRandomInt, array_chunks, loadPage, makeQueryString } = require('./helpers');
 const { searchWorkPage, getWorkData, makeWorkAnswer, makeWorksUrl, getWorkImages, getRandomParagraph, techMsg } = require('./func');
-const { fkTagYears, fkTag, winterFkTag, ao3Url, fkTagCollections } = require('../constants');
+const { fkTagYears, fkTag, winterFkTag, ao3Url, fkTagCollections, ratingTags, ratingColors } = require('../constants');
 
 const { DISCORD_APPLICATION_ID } = process.env;
 
@@ -404,7 +404,7 @@ const makeWorkDiscord = async (token, userId, queryAttrs = {}) => {
     }
 }
 
-const makeEmbed = (title, fandom, randomWorkUrl, downloadLink, randomParagraphText, summary, images, otherLinks, author, tags) => {
+const makeEmbed = (title, fandom, randomWorkUrl, randomParagraphText, summary, images, otherLinks, author, tags, rating) => {
     const embed = {
         type: 'rich',
         title: title,
@@ -412,9 +412,18 @@ const makeEmbed = (title, fandom, randomWorkUrl, downloadLink, randomParagraphTe
         fields: [],
     }
 
+    if (ratingColors[rating]) {
+        embed.color = ratingColors[rating];
+    }
+
     embed.fields.push({
         name: 'Фандом',
         value: fandom,
+    });
+
+    embed.fields.push({
+        name: 'Рейтинг',
+        value: ratingTags[rating],
     });
 
     if (randomParagraphText) embed.fields.push({
@@ -467,7 +476,7 @@ const makeWorkFunction = async (worksUrl, queryAttrs, token, userId) => {
         })
     })
 
-    const { fandom, title, downloadLink, summary, author, tags } = await getWorkData(dom);
+    const { fandom, title, summary, author, tags, rating } = await getWorkData(dom);
     const randomParagraphText = getRandomParagraph(dom).slice(0, 900);
     const { media, otherLinks } = getWorkImages(dom);
     const images = [];
@@ -477,7 +486,8 @@ const makeWorkFunction = async (worksUrl, queryAttrs, token, userId) => {
         })
     })
 
-    const embed = makeEmbed(title, fandom, randomWorkUrl, downloadLink, randomParagraphText, summary, images, otherLinks, author, tags);
+
+    const embed = makeEmbed(title, fandom, randomWorkUrl, randomParagraphText, summary, images, otherLinks, author, tags, rating);
 
     await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${token}`, {
         headers: { 'Content-Type': 'application/json' },

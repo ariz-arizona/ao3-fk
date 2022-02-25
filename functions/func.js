@@ -1,6 +1,6 @@
 const HTMLParser = require('node-html-parser');
 
-const { ao3Url } = require('../constants');
+const { ao3Url, ratingTags } = require('../constants');
 const { getRandomInt, makeQueryString, getSearchParametres, loadPage, array_chunks } = require('./helpers');
 
 //todo глобальные переменные?
@@ -56,6 +56,9 @@ const getWorkData = async (dom) => {
     const downloadLink = dom.querySelector('.download > ul > li:nth-child(2) > a') ? dom.querySelector('.download > ul > li:nth-child(2) > a').getAttribute('href') : null;
     const summary = dom.querySelector('.summary .userstuff') ? dom.querySelector('.summary .userstuff').textContent.trim() : '';
 
+    const ratingRaw = dom.querySelector('dd.rating.tags').textContent.trim();
+    const rating = Object.keys(ratingTags).find(key => ratingTags[key] === ratingRaw);
+    
     const author = [];
     dom.querySelectorAll('a[rel="author"]').forEach(el => {
         if (el.textContent) author.push(el.textContent)
@@ -66,7 +69,7 @@ const getWorkData = async (dom) => {
         if (el.textContent) tags.push(el.textContent)
     });
 
-    return { fandom, title, downloadLink, summary, author, tags }
+    return { fandom, title, downloadLink, summary, author, tags, rating }
 }
 
 const makeWorkAnswer = (title, fandom, downloadLink, summary, randomWorkUrl) => {

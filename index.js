@@ -12,7 +12,7 @@ const { makeQueryString, loadPage } = require('./functions/helpers');
 
 const { BOT_TOKEN, CURRENT_HOST, DISCORD_APPLICATION_ID } = process.env;
 //todo port в переменные среды
-const APP_PORT = 443;
+const APP_PORT = 8443;
 
 const app = express();
 
@@ -88,6 +88,7 @@ app.post(`/callback`, async (_req, res) => {
 
     res.sendStatus(200);
 });
+
 app.all('/nude_random/:messageId/:timestamp', async (_req, res) => {
     // const { messageId } = _req.params;
     if (!_req.body.application_id) {
@@ -207,7 +208,7 @@ app.all('/collection_select/:messageId', async (_req, res) => {
 
     const url = `${ao3Url}${message.data.values[0]}`;
     const { dom, href } = await workParserFinder(url);
-    const { fandom, title, downloadLink, summary, author, tags } = await getWorkData(dom);
+    const { fandom, title, summary, author, tags, rating } = await getWorkData(dom);
 
     const randomParagraphText = getRandomParagraph(dom).slice(0, 900);
     const { media, otherLinks } = getWorkImages(dom);
@@ -218,7 +219,7 @@ app.all('/collection_select/:messageId', async (_req, res) => {
         })
     })
 
-    const embed = makeEmbed(title, fandom, href, downloadLink, randomParagraphText, summary, images, otherLinks, author, tags);
+    const embed = makeEmbed(title, fandom, href, randomParagraphText, summary, images, otherLinks, author, tags, rating);
 
     await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${token}/messages/@original`, {
         headers: { 'Content-Type': 'application/json' },
@@ -275,7 +276,7 @@ app.all('/card_modal/:messageId', async (_req, res) => {
         };
         const content = await loadPage(`${url}${makeQueryString(queryAttrs)}`);
         const dom = HTMLParser.parse(content);
-        const { fandom, title, downloadLink, summary, author, tags } = await getWorkData(dom);
+        const { fandom, title, summary, author, tags, rating } = await getWorkData(dom);
 
         const randomParagraphText = getRandomParagraph(dom).slice(0, 900);
         const { media, otherLinks } = getWorkImages(dom);
@@ -286,7 +287,7 @@ app.all('/card_modal/:messageId', async (_req, res) => {
             })
         })
 
-        const embed = makeEmbed(title, fandom, `/works/${workId}`, downloadLink, randomParagraphText, summary, images, otherLinks, author, tags);
+        const embed = makeEmbed(title, fandom, `/works/${workId}`, randomParagraphText, summary, images, otherLinks, author, tags, rating);
 
         await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${token}`, {
             headers: { 'Content-Type': 'application/json' },
@@ -340,13 +341,13 @@ app.post('/discord', async (_req, res) => {
         message.type === InteractionType.APPLICATION_COMMAND
         || message.type === InteractionType.APPLICATION_COMMAND_AUTOCOMPLETE
         || message.type === InteractionType.MESSAGE_COMPONENT
-        || 5
+        || 5 // MODAL
     ) {
         try {
             const command = message.data.name || message.data.custom_id;
             switch (command) {
                 case 'nude_random':
-                    fetch(`http${_req.headers.host === 'localhost:443' ? '' : 's'}://${_req.headers.host}/nude_random/${message.id}/${timestamp}`, {
+                    fetch(`http${_req.headers.host === `localhost:${APP_PORT}` ? '' : 's'}://${_req.headers.host}/nude_random/${message.id}/${timestamp}`, {
                         method: 'post',
                         headers: {
                             'Content-Type': 'application/json'
@@ -365,7 +366,7 @@ app.post('/discord', async (_req, res) => {
                     });
                     break;
                 case 'random':
-                    fetch(`http${_req.headers.host === 'localhost:443' ? '' : 's'}://${_req.headers.host}/random/${message.id}/${timestamp}`, {
+                    fetch(`http${_req.headers.host === `localhost:${APP_PORT}` ? '' : 's'}://${_req.headers.host}/random/${message.id}/${timestamp}`, {
                         method: 'post',
                         headers: {
                             'Content-Type': 'application/json'
@@ -384,7 +385,7 @@ app.post('/discord', async (_req, res) => {
                     });
                     break;
                 case 'collection':
-                    fetch(`http${_req.headers.host === 'localhost:443' ? '' : 's'}://${_req.headers.host}/collection/${message.id}/${timestamp}`, {
+                    fetch(`http${_req.headers.host === `localhost:${APP_PORT}` ? '' : 's'}://${_req.headers.host}/collection/${message.id}/${timestamp}`, {
                         method: 'post',
                         headers: {
                             'Content-Type': 'application/json'
@@ -403,7 +404,7 @@ app.post('/discord', async (_req, res) => {
                     });
                     break;
                 case 'collection_select':
-                    fetch(`http${_req.headers.host === 'localhost:443' ? '' : 's'}://${_req.headers.host}/collection_select/${message.message.interaction.id}`, {
+                    fetch(`http${_req.headers.host === `localhost:${APP_PORT}` ? '' : 's'}://${_req.headers.host}/collection_select/${message.message.interaction.id}`, {
                         method: 'post',
                         headers: {
                             'Content-Type': 'application/json'
@@ -462,7 +463,7 @@ app.post('/discord', async (_req, res) => {
                     break;
 
                 case 'card_modal':
-                    fetch(`http${_req.headers.host === 'localhost:443' ? '' : 's'}://${_req.headers.host}/card_modal/${message.id}`, {
+                    fetch(`http${_req.headers.host === `localhost:${APP_PORT}` ? '' : 's'}://${_req.headers.host}/card_modal/${message.id}`, {
                         method: 'post',
                         headers: {
                             'Content-Type': 'application/json'

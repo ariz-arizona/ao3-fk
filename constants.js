@@ -19,4 +19,19 @@ const fkTagCollections = {
 
 const worksUrl = `${ao3Url}/tags/${fkTag}/works`;
 
-module.exports = { worksUrl, ao3Url, fkTag, winterFkTag, fkTagYears, fkTagCollections }
+const ratingTags = {
+    not_rated: 'Not Rated',
+    g: 'General Audiences',
+    t: 'Teen And Up Audiences',
+    m: 'Mature',
+    e: 'Explicit'
+};
+
+const ratingColors = {
+    g: 2067276, //dark green
+    t: 15844367, //gold
+    m: 3426654, //navy
+    e: 15548997	 //red
+}
+
+module.exports = { worksUrl, ao3Url, fkTag, winterFkTag, fkTagYears, fkTagCollections, ratingTags, ratingColors }
