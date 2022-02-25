@@ -141,6 +141,10 @@ app.all('/random/:messageId/:timestamp', async (_req, res) => {
         }
     }
 
+    if (options.rating) {
+        queryAttrs['work_search%5Brating_ids%5D'] = options.rating;
+    }
+
     if (options.query) {
         queryAttrs['work_search%5Bquery%5D'] = encodeURIComponent(options.query);
     }

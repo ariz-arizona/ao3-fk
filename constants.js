@@ -34,4 +34,12 @@ const ratingColors = {
     e: 15548997	 //red
 }
 
-module.exports = { worksUrl, ao3Url, fkTag, winterFkTag, fkTagYears, fkTagCollections, ratingTags, ratingColors }
+const ratingIds = {
+    not_rated: '9',
+    g: '10',
+    t: '11',
+    m: '12',
+    e: '13'
+}
+
+module.exports = { worksUrl, ao3Url, fkTag, winterFkTag, fkTagYears, fkTagCollections, ratingTags, ratingColors, ratingIds }
