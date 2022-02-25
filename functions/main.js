@@ -419,11 +419,13 @@ const makeEmbed = (title, fandom, randomWorkUrl, randomParagraphText, summary, i
     embed.fields.push({
         name: 'Фандом',
         value: fandom,
+        inline: true
     });
 
     embed.fields.push({
         name: 'Рейтинг',
         value: ratingTags[rating],
+        inline: true
     });
 
     if (randomParagraphText) embed.fields.push({
