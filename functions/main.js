@@ -433,11 +433,6 @@ const makeEmbed = (title, fandom, randomWorkUrl, randomParagraphText, summary, i
         value: randomParagraphText
     });
 
-    if (author && author.length) embed.fields.push({
-        name: 'Автор',
-        value: author.join(', ')
-    });
-
     if (tags && tags.length) embed.fields.push({
         name: 'Тэги',
         value: tags.join(', ').slice(0, 1000)
@@ -447,6 +442,7 @@ const makeEmbed = (title, fandom, randomWorkUrl, randomParagraphText, summary, i
         name: 'Саммари',
         value: summary,
     });
+
     if (images.length) {
         embed.image = { url: images[0] };
         embed.fields.push({
@@ -454,6 +450,7 @@ const makeEmbed = (title, fandom, randomWorkUrl, randomParagraphText, summary, i
             value: images.join('\n'),
         });
     }
+
     if (otherLinks.length) embed.fields.push({
         name: 'Видео',
         value: otherLinks.join('\n'),
@@ -463,6 +460,12 @@ const makeEmbed = (title, fandom, randomWorkUrl, randomParagraphText, summary, i
         name: 'Не забудьте про кудос',
         value: `${ao3Url}${randomWorkUrl}#new_kudo`,
     });
+
+
+    if (author && author.length) embed.footer = {
+        icon_url: 'https://s3.amazonaws.com/otw-ao3-icons/icons/7145533/standard.png',
+        text: author.join(', ')
+    };
 
     return embed;
 }
