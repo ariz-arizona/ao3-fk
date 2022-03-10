@@ -9,8 +9,7 @@ const { makeWorkDiscord, collectionFinderFunc, workParserFinder, makeEmbed } = r
 const { getWorkData, getRandomParagraph, getWorkImages } = require('./functions/func');
 const { makeQueryString, loadPage } = require('./functions/helpers');
 
-//todo port в переменные среды
-const { DISCORD_APPLICATION_ID, APP_PORT = 8443 } = process.env;
+const { DISCORD_APPLICATION_ID } = process.env;
 
 router.post('/nude_random/:messageId/:timestamp', async (_req, res) => {
     // const { messageId } = _req.params;
@@ -271,7 +270,7 @@ router.post('/discord', async (_req, res) => {
             const command = message.data.name || message.data.custom_id;
             switch (command) {
                 case 'nude_random':
-                    fetch(`http${_req.headers.host === `localhost:${APP_PORT}` ? '' : 's'}://${_req.headers.host}/nude_random/${message.id}/${timestamp}`, {
+                    fetch(`http${_req.headers.host.indexOf('localhost') !== -1 ? '' : 's'}://${_req.headers.host}/nude_random/${message.id}/${timestamp}`, {
                         method: 'post',
                         headers: {
                             'Content-Type': 'application/json'
@@ -290,7 +289,7 @@ router.post('/discord', async (_req, res) => {
                     });
                     break;
                 case 'random':
-                    fetch(`http${_req.headers.host === `localhost:${APP_PORT}` ? '' : 's'}://${_req.headers.host}/random/${message.id}/${timestamp}`, {
+                    fetch(`http${_req.headers.host.indexOf('localhost') !== -1 ? '' : 's'}://${_req.headers.host}/random/${message.id}/${timestamp}`, {
                         method: 'post',
                         headers: {
                             'Content-Type': 'application/json'
@@ -309,7 +308,7 @@ router.post('/discord', async (_req, res) => {
                     });
                     break;
                 case 'collection':
-                    fetch(`http${_req.headers.host === `localhost:${APP_PORT}` ? '' : 's'}://${_req.headers.host}/collection/${message.id}/${timestamp}`, {
+                    fetch(`http${_req.headers.host.indexOf('localhost') !== -1 ? '' : 's'}://${_req.headers.host}/collection/${message.id}/${timestamp}`, {
                         method: 'post',
                         headers: {
                             'Content-Type': 'application/json'
@@ -328,7 +327,7 @@ router.post('/discord', async (_req, res) => {
                     });
                     break;
                 case 'collection_select':
-                    fetch(`http${_req.headers.host === `localhost:${APP_PORT}` ? '' : 's'}://${_req.headers.host}/collection_select/${message.message.interaction.id}`, {
+                    fetch(`http${_req.headers.host.indexOf('localhost') !== -1 ? '' : 's'}://${_req.headers.host}/collection_select/${message.message.interaction.id}`, {
                         method: 'post',
                         headers: {
                             'Content-Type': 'application/json'
@@ -387,7 +386,7 @@ router.post('/discord', async (_req, res) => {
                     break;
 
                 case 'card_modal':
-                    fetch(`http${_req.headers.host === `localhost:${APP_PORT}` ? '' : 's'}://${_req.headers.host}/card_modal/${message.id}`, {
+                    fetch(`http${_req.headers.host.indexOf('localhost') !== -1 ? '' : 's'}://${_req.headers.host}/card_modal/${message.id}`, {
                         method: 'post',
                         headers: {
                             'Content-Type': 'application/json'
