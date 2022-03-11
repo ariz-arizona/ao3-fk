@@ -4,7 +4,7 @@ const HTMLParser = require('node-html-parser');
 const fetch = require('@vercel/fetch')(require('cross-fetch'));
 
 const { getRandomInt, array_chunks, loadPage, makeQueryString } = require('./helpers');
-const { searchWorkPage, getWorkData, makeWorkAnswer, makeWorksUrl, getWorkImages, getRandomParagraph, techMsg } = require('./func');
+const { searchWorkPage, getWorkData, makeWorkAnswer, makeWorksUrl, getWorkImages, getRandomParagraph, techMsg, errorMessage } = require('./func');
 const { fkTagYears, fkTag, winterFkTag, ao3Url, fkTagCollections, ratingTags, ratingColors } = require('../config/constants');
 
 const { DISCORD_APPLICATION_ID } = process.env;
@@ -383,15 +383,8 @@ const makeWorkDiscord = async (token, userId, queryAttrs = {}) => {
 
         return true;
     } catch (error) {
-        console.log(error.message)
-        let msg;
-        switch (error.message) {
-            case 'notfound':
-                msg = 'Я ничего не нашел :(';
-                break;
-            default:
-                msg = 'Ой! Что-то случилось! Может, попробуете еще раз?';
-        }
+        console.log(error.message);
+        const msg = errorMessage(error);
         await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${token}/messages/@original`, {
             headers: { 'Content-Type': 'application/json' },
             method: "PATCH",

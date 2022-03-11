@@ -123,10 +123,7 @@ const getRandomParagraph = dom => {
     return randomParagraphText;
 }
 
-const showError = (error) => {
-    const bot = global.bot;
-    const chatId = global.chatId;
-
+const errorMessage = (error) => {
     let msg;
     switch (error.message) {
         case 'notfound':
@@ -134,6 +131,14 @@ const showError = (error) => {
         default:
             msg = 'Ой! Что-то случилось! Может, попробуете еще раз?';
     }
+    return msg;
+}
+
+const showError = (error) => {
+    const bot = global.bot;
+    const chatId = global.chatId;
+
+    const msg = errorMessage(error);
     bot.sendMessage(chatId, msg);
     console.log(`Ошибка в чате ${chatId}\n${error.code}`);
 }
@@ -164,4 +169,14 @@ const techMsg = async (msg, isNew = false) => {
     }
 }
 
-module.exports = { searchWorkPage, getWorkData, makeWorkAnswer, getWorkImages, getRandomParagraph, showError, makeWorksUrl, techMsg }
+module.exports = { 
+    searchWorkPage, 
+    getWorkData, 
+    makeWorkAnswer, 
+    getWorkImages, 
+    getRandomParagraph,
+    errorMessage, 
+    showError, 
+    makeWorksUrl, 
+    techMsg 
+}

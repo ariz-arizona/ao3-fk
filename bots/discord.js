@@ -1,7 +1,7 @@
 const router = require('express').Router();
 
 const fetch = require('@vercel/fetch')(require('cross-fetch'));
-const { InteractionType, InteractionResponseType, verifyKey } = require('discord-interactions');
+const { InteractionType, InteractionResponseType, verifyKey, InteractionResponseFlags } = require('discord-interactions');
 const HTMLParser = require('node-html-parser');
 
 const { ao3Url, fkTagCollections } = require('../config/constants');
@@ -283,7 +283,7 @@ router.post('/discord', async (_req, res) => {
                     res.status(200).send({
                         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                         data: {
-                            flags: 1 << 6,
+                            flags: InteractionResponseFlags.EPHEMERAL,
                             content: `Начинаю искать работу`
                         }
                     });
@@ -302,7 +302,7 @@ router.post('/discord', async (_req, res) => {
                     res.status(200).send({
                         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                         data: {
-                            flags: 1 << 6,
+                            flags: InteractionResponseFlags.EPHEMERAL,
                             content: `Начинаю искать работу`
                         }
                     });
@@ -321,7 +321,7 @@ router.post('/discord', async (_req, res) => {
                     res.status(200).send({
                         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                         data: {
-                            flags: 1 << 6,
+                            flags: InteractionResponseFlags.EPHEMERAL,
                             content: `Начинаю искать коллекцию`
                         }
                     });
@@ -340,7 +340,7 @@ router.post('/discord', async (_req, res) => {
                     res.status(200).send({
                         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                         data: {
-                            flags: 1 << 6,
+                            flags: InteractionResponseFlags.EPHEMERAL,
                             content: `Начинаю искать работу`
                         }
                     });
@@ -399,7 +399,7 @@ router.post('/discord', async (_req, res) => {
                     res.status(200).send({
                         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                         data: {
-                            flags: 1 << 6,
+                            flags: InteractionResponseFlags.EPHEMERAL,
                             content: `Начинаю искать работу`
                         }
                     });
@@ -409,7 +409,7 @@ router.post('/discord', async (_req, res) => {
                     res.status(200).send({
                         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                         data: {
-                            flags: 1 << 6,
+                            flags: InteractionResponseFlags.EPHEMERAL,
                             content: `Я этого не умею :(`
                         }
                     });
