@@ -4,10 +4,10 @@ const fetch = require('@vercel/fetch')(require('cross-fetch'));
 const { InteractionType, InteractionResponseType, verifyKey } = require('discord-interactions');
 const HTMLParser = require('node-html-parser');
 
-const { ao3Url, fkTagCollections } = require('./constants');
-const { makeWorkDiscord, collectionFinderFunc, workParserFinder, makeEmbed } = require('./functions/main');
-const { getWorkData, getRandomParagraph, getWorkImages } = require('./functions/func');
-const { makeQueryString, loadPage } = require('./functions/helpers');
+const { ao3Url, fkTagCollections } = require('../config/constants');
+const { makeWorkDiscord, collectionFinderFunc, workParserFinder, makeEmbed } = require('../functions/main');
+const { getWorkData, getRandomParagraph, getWorkImages } = require('../functions/func');
+const { makeQueryString, loadPage } = require('../functions/helpers');
 
 const { DISCORD_APPLICATION_ID } = process.env;
 

@@ -1,11 +1,11 @@
 require('dotenv').config()
+
 const HTMLParser = require('node-html-parser');
-// const { default: fetch } = require('cross-fetch');
 const fetch = require('@vercel/fetch')(require('cross-fetch'));
 
 const { getRandomInt, array_chunks, loadPage, makeQueryString } = require('./helpers');
 const { searchWorkPage, getWorkData, makeWorkAnswer, makeWorksUrl, getWorkImages, getRandomParagraph, techMsg } = require('./func');
-const { fkTagYears, fkTag, winterFkTag, ao3Url, fkTagCollections, ratingTags, ratingColors } = require('../constants');
+const { fkTagYears, fkTag, winterFkTag, ao3Url, fkTagCollections, ratingTags, ratingColors } = require('../config/constants');
 
 const { DISCORD_APPLICATION_ID } = process.env;
 

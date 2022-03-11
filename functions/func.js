@@ -1,6 +1,6 @@
 const HTMLParser = require('node-html-parser');
 
-const { ao3Url, ratingTags } = require('../constants');
+const { ao3Url, ratingTags } = require('../config/constants');
 const { getRandomInt, makeQueryString, getSearchParametres, loadPage, array_chunks } = require('./helpers');
 
 //todo глобальные переменные?

@@ -2,9 +2,9 @@ const router = require('express').Router();
 
 const TelegramBot = require('node-telegram-bot-api');
 
-const { fkTagYears, winterFkTag } = require('./constants');
-const { set, cit, pic, collection, onCallbackQuery } = require('./functions/main');
-const { showError } = require('./functions/func');
+const { fkTagYears, winterFkTag } = require('../config/constants');
+const { set, cit, pic, collection, onCallbackQuery } = require('../functions/main');
+const { showError } = require('../functions/func');
 
 const { BOT_TOKEN, CURRENT_HOST } = process.env;
 

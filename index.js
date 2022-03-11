@@ -12,8 +12,8 @@ app.use(express.json({
     },
 }));
 
-app.use('/', require('./tg'));
-app.use('/', require('./discord'));
+app.use('/', require('./bots/tg'));
+app.use('/', require('./bots/discord'));
 
 app.get('/', async (_req, res) => {
     res.send(`listening on ${CURRENT_HOST}`)
