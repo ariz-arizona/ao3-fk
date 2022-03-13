@@ -1,4 +1,4 @@
-require('dotenv').config({ path: 'dev.env' })
+require('dotenv').config({ path: './env/test.env' })
 const express = require('express');
 
 //todo port в переменные среды

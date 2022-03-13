@@ -6,9 +6,9 @@ const { fkTagYears, winterFkTag } = require('../config/constants');
 const { set, cit, pic, collection, onCallbackQuery } = require('../functions/main');
 const { showError } = require('../functions/func');
 
-const { BOT_TOKEN, CURRENT_HOST } = process.env;
+const { TG_TOKEN, CURRENT_HOST } = process.env;
 
-const bot = new TelegramBot(BOT_TOKEN);
+const bot = new TelegramBot(TG_TOKEN);
 bot.setWebHook(`${CURRENT_HOST}/callback`, { allowed_updates: ["message", "edited_message", "callback_query", "inline_query"] });
 
 global.bot = bot;
