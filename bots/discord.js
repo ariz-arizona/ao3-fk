@@ -248,7 +248,7 @@ router.post('/discord', async (_req, res) => {
         timestamp,
         process.env.DISCORD_PUB_KEY
     );
-
+console.log({isValidRequest, timestamp})
     if (!isValidRequest) {
         return res.status(401).send({ error: 'Bad request signature ' });
     }
