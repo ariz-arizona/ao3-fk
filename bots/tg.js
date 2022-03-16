@@ -9,7 +9,7 @@ const { showError } = require('../functions/func');
 const { TG_TOKEN, CURRENT_HOST } = process.env;
 
 const bot = new TelegramBot(TG_TOKEN);
-bot.setWebHook(`${CURRENT_HOST}/tg${TG_TOKEN}`, { allowed_updates: ["message", "edited_message", "callback_query", "inline_query"] });
+bot.setWebHook(`${CURRENT_HOST}/tg${TG_TOKEN.replace(':', '_')}`, { allowed_updates: ["message", "edited_message", "callback_query", "inline_query"] });
 
 global.bot = bot;
 
@@ -24,7 +24,7 @@ bot.on('polling_error', (error) => {
     console.log(error.code);
 });
 
-router.post(`/callback${TG_TOKEN}`, async (_req, res) => {
+router.post(`/callback${TG_TOKEN.replace(':', '_')}`, async (_req, res) => {
     if (_req.body.message) {
         const msgText = _req.body.message.text;
         const chatId = _req.body.message.chat.id;
