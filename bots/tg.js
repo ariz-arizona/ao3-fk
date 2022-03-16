@@ -24,7 +24,7 @@ bot.on('polling_error', (error) => {
     console.log(error.code);
 });
 
-router.post(`/callback${TG_TOKEN.replace(':', '_')}`, async (_req, res) => {
+router.post(`/tg${TG_TOKEN.replace(':', '_')}`, async (_req, res) => {
     if (_req.body.message) {
         const msgText = _req.body.message.text;
         const chatId = _req.body.message.chat.id;
