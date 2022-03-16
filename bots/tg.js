@@ -9,7 +9,7 @@ const { showError } = require('../functions/func');
 const { TG_TOKEN, CURRENT_HOST } = process.env;
 
 const bot = new TelegramBot(TG_TOKEN);
-bot.setWebHook(`${CURRENT_HOST}/callback`, { allowed_updates: ["message", "edited_message", "callback_query", "inline_query"] });
+bot.setWebHook(`${CURRENT_HOST}/tg/${TG_TOKEN}`, { allowed_updates: ["message", "edited_message", "callback_query", "inline_query"] });
 
 global.bot = bot;
 
