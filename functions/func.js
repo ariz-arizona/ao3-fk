@@ -126,8 +126,8 @@ const getRandomParagraph = dom => {
     return randomParagraphText;
 }
 
-const getWorkAllData = (dom) => {
-    const { fandom, title, summary, author, tags, rating } = getWorkData(dom);
+const getWorkAllData = async (dom) => {
+    const { fandom, title, summary, author, tags, rating } = await getWorkData(dom);
     const randomParagraphText = getRandomParagraph(dom).slice(0, 900);
     const { media, otherLinks } = getWorkImages(dom);
     const images = [];
@@ -189,7 +189,7 @@ const techMsg = async (msg, isNew = false) => {
 const discordWebhookResponse = async (method = 'POST', token, body) => {
     const url = `https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${token}`;
     // todo try catch
-    console.log({method, body})
+    // console.log({method, body})
     const response = await fetch(`${url}${method === 'PATCH' ? '/messages/@original' : ''}`, {
         headers: { 'Content-Type': 'application/json' },
         method: method,

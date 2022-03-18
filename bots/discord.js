@@ -12,7 +12,7 @@ const { makeQueryString, loadPage } = require('../functions/helpers');
 const { DISCORD_APPLICATION_ID } = process.env;
 
 router.post('/nude_random/:messageId/:timestamp', async (_req, res) => {
-    // const { messageId } = _req.params;
+    // todo вывод ошибки
     // if (!_req.body.application_id) {
     //     return;
     // }
@@ -22,7 +22,6 @@ router.post('/nude_random/:messageId/:timestamp', async (_req, res) => {
     const userId = message.guild_id ? message.member.user.id : message.user.id;
 
     try {
-        // consosle.log({message})
         const queryAttrs = {};
 
         if (global.additionalTag) {
@@ -39,7 +38,7 @@ router.post('/nude_random/:messageId/:timestamp', async (_req, res) => {
             content: `Нашел работу ${randomWorkUrl}`
         });
 
-        const { title, fandom, randomParagraphText, summary, images, otherLinks, author, tags, rating } = getWorkAllData(dom);
+        const { title, fandom, randomParagraphText, summary, images, otherLinks, author, tags, rating } = await getWorkAllData(dom);
 
         const embed = makeEmbed(title, fandom, randomWorkUrl, randomParagraphText, summary, images, otherLinks, author, tags, rating);
 
