@@ -14,7 +14,7 @@
 
 ### Для запуска:
  * Запустить ngrok `ngrok http 8443` [linux]
- * Указать домен ngrok в `dev.env/CURRENT_HOST`
+ * Указать домен ngrok в `env/test.env/CURRENT_HOST`
  * Запустить скрипт `node index.js`
  * В настройках бота дискорда указать нужный эндпоинт
 

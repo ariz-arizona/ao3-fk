@@ -1,7 +1,10 @@
 const HTMLParser = require('node-html-parser');
+const fetch = require('@vercel/fetch')(require('cross-fetch'));
 
 const { ao3Url, ratingTags } = require('../config/constants');
 const { getRandomInt, makeQueryString, getSearchParametres, loadPage, array_chunks } = require('./helpers');
+
+const { DISCORD_APPLICATION_ID } = process.env;
 
 //todo глобальные переменные?
 const searchWorkPage = async (worksUrl, queryAttrs) => {
@@ -58,7 +61,7 @@ const getWorkData = async (dom) => {
 
     const ratingRaw = dom.querySelector('dd.rating.tags').textContent.trim();
     const rating = Object.keys(ratingTags).find(key => ratingTags[key] === ratingRaw);
-    
+
     const author = [];
     dom.querySelectorAll('a[rel="author"]').forEach(el => {
         if (el.textContent) author.push(el.textContent)
@@ -123,6 +126,20 @@ const getRandomParagraph = dom => {
     return randomParagraphText;
 }
 
+const getWorkAllData = (dom) => {
+    const { fandom, title, summary, author, tags, rating } = getWorkData(dom);
+    const randomParagraphText = getRandomParagraph(dom).slice(0, 900);
+    const { media, otherLinks } = getWorkImages(dom);
+    const images = [];
+    media.map(el => {
+        el.map(img => {
+            images.push(img.media)
+        })
+    })
+
+    return { title, fandom, randomParagraphText, summary, images, otherLinks, author, tags, rating };
+}
+
 const errorMessage = (error) => {
     let msg;
     switch (error.message) {
@@ -169,14 +186,33 @@ const techMsg = async (msg, isNew = false) => {
     }
 }
 
-module.exports = { 
-    searchWorkPage, 
-    getWorkData, 
-    makeWorkAnswer, 
-    getWorkImages, 
+const discordWebhookResponse = async (method = 'POST', token, body) => {
+    const url = `https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${token}`;
+    // todo try catch
+    console.log({method, body})
+    const response = await fetch(`${url}${method === 'PATCH' ? '/messages/@original' : ''}`, {
+        headers: { 'Content-Type': 'application/json' },
+        method: method,
+        body: JSON.stringify(body)
+    });
+
+    if (response.status >= 400) {
+        console.log(JSON.stringify(response))
+    }
+
+    return true;
+}
+
+module.exports = {
+    searchWorkPage,
+    getWorkData,
+    makeWorkAnswer,
+    getWorkImages,
     getRandomParagraph,
-    errorMessage, 
-    showError, 
-    makeWorksUrl, 
-    techMsg 
+    getWorkAllData,
+    errorMessage,
+    showError,
+    makeWorksUrl,
+    techMsg,
+    discordWebhookResponse
 }

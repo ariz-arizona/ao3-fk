@@ -6,21 +6,51 @@ const HTMLParser = require('node-html-parser');
 
 const { ao3Url, fkTagCollections } = require('../config/constants');
 const { makeWorkDiscord, collectionFinderFunc, workParserFinder, makeEmbed } = require('../functions/main');
-const { getWorkData, getRandomParagraph, getWorkImages } = require('../functions/func');
+const { getWorkData, getRandomParagraph, getWorkImages, discordWebhookResponse, makeWorksUrl, searchWorkPage, getWorkAllData } = require('../functions/func');
 const { makeQueryString, loadPage } = require('../functions/helpers');
 
 const { DISCORD_APPLICATION_ID } = process.env;
 
 router.post('/nude_random/:messageId/:timestamp', async (_req, res) => {
     // const { messageId } = _req.params;
-    if (!_req.body.application_id) {
-        return;
-    }
+    // if (!_req.body.application_id) {
+    //     return;
+    // }
+
     const message = _req.body;
     const { token } = message;
     const userId = message.guild_id ? message.member.user.id : message.user.id;
 
-    await makeWorkDiscord(token, userId, {});
+    try {
+        // consosle.log({message})
+        const queryAttrs = {};
+
+        if (global.additionalTag) {
+            queryAttrs['work_search%5Bother_tag_names%5D'] = global.additionalTag;
+        }
+
+        await discordWebhookResponse('PATCH', token, {
+            content: `Начинаю искать случайную работу по тегам ${[global.additionalTag, global.seasonTag].join(', ')}`
+        });
+
+        const { dom, randomWorkUrl } = await searchWorkPage(makeWorksUrl(global.seasonTag), queryAttrs);
+
+        await discordWebhookResponse('PATCH', token, {
+            content: `Нашел работу ${randomWorkUrl}`
+        });
+
+        const { title, fandom, randomParagraphText, summary, images, otherLinks, author, tags, rating } = getWorkAllData(dom);
+
+        const embed = makeEmbed(title, fandom, randomWorkUrl, randomParagraphText, summary, images, otherLinks, author, tags, rating);
+
+        await discordWebhookResponse('POST', token, {
+            content: userId ? `<@${userId}> спрашивал, и я нашел ответ:` : '',
+            embeds: [embed]
+        });
+    } catch (error) {
+        console.log(error)
+    }
+
     res.sendStatus(200)
 })
 
