@@ -11,11 +11,32 @@ const { makeQueryString, loadPage } = require('../functions/helpers');
 
 const { DISCORD_APPLICATION_ID } = process.env;
 
+const randomWorkFinder = async (token, queryAttrs, userId) => {
+    await discordWebhookResponse('PATCH', token, {
+        content: `Начинаю искать случайную работу по тегам ${[global.additionalTag, global.seasonTag].join(', ')}`
+    });
+
+    const { dom, randomWorkUrl } = await searchWorkPage(makeWorksUrl(global.seasonTag), queryAttrs);
+
+    await discordWebhookResponse('PATCH', token, {
+        content: `Нашел работу ${randomWorkUrl}`
+    });
+
+    const { title, fandom, randomParagraphText, summary, images, otherLinks, author, tags, rating } = await getWorkAllData(dom);
+
+    const embed = makeEmbed(title, fandom, randomWorkUrl, randomParagraphText, summary, images, otherLinks, author, tags, rating);
+
+    await discordWebhookResponse('POST', token, {
+        content: userId ? `<@${userId}> спрашивал, и я нашел ответ:` : '',
+        embeds: [embed]
+    });
+}
+
 router.post('/nude_random/:messageId/:timestamp', async (_req, res) => {
     // todo вывод ошибки
-    // if (!_req.body.application_id) {
-    //     return;
-    // }
+    if (!_req.body.application_id) {
+        throw new Error('no application_id');
+    }
 
     const message = _req.body;
     const { token } = message;
@@ -28,24 +49,7 @@ router.post('/nude_random/:messageId/:timestamp', async (_req, res) => {
             queryAttrs['work_search%5Bother_tag_names%5D'] = global.additionalTag;
         }
 
-        await discordWebhookResponse('PATCH', token, {
-            content: `Начинаю искать случайную работу по тегам ${[global.additionalTag, global.seasonTag].join(', ')}`
-        });
-
-        const { dom, randomWorkUrl } = await searchWorkPage(makeWorksUrl(global.seasonTag), queryAttrs);
-
-        await discordWebhookResponse('PATCH', token, {
-            content: `Нашел работу ${randomWorkUrl}`
-        });
-
-        const { title, fandom, randomParagraphText, summary, images, otherLinks, author, tags, rating } = await getWorkAllData(dom);
-
-        const embed = makeEmbed(title, fandom, randomWorkUrl, randomParagraphText, summary, images, otherLinks, author, tags, rating);
-
-        await discordWebhookResponse('POST', token, {
-            content: userId ? `<@${userId}> спрашивал, и я нашел ответ:` : '',
-            embeds: [embed]
-        });
+        await randomWorkFinder(token, queryAttrs, userId);
     } catch (error) {
         console.log(error)
     }
@@ -54,53 +58,58 @@ router.post('/nude_random/:messageId/:timestamp', async (_req, res) => {
 })
 
 router.post('/random/:messageId/:timestamp', async (_req, res) => {
-    // const { messageId } = _req.params;
     if (!_req.body.application_id) {
-        return;
+        throw new Error('no application_id');
     }
+
     const message = _req.body;
     const { token } = message;
     const userId = message.guild_id ? message.member.user.id : message.user.id;
+    
+    try {
+        const options = {};
+        (message.data.options || []).forEach(element => {
+            options[element.name] = element.value;
+        });
 
-    const options = {};
-    (message.data.options || []).forEach(element => {
-        options[element.name] = element.value;
-    });
-
-    const queryAttrs = {};
-    if (options.comments_count) {
-        if (options.comments_count === 'few') {
-            queryAttrs['work_search%5Bcomments_count%5D'] = encodeURIComponent('<3');
-        } else if (options.comments_count === 'zero') {
-            queryAttrs['work_search%5Bcomments_count%5D'] = encodeURIComponent('<1');
+        const queryAttrs = {};
+        if (options.comments_count) {
+            if (options.comments_count === 'few') {
+                queryAttrs['work_search%5Bcomments_count%5D'] = encodeURIComponent('<3');
+            } else if (options.comments_count === 'zero') {
+                queryAttrs['work_search%5Bcomments_count%5D'] = encodeURIComponent('<1');
+            }
         }
-    }
 
-    if (options.kudos_count) {
-        if (options.kudos_count === 'few') {
-            queryAttrs['work_search%5Bkudos_count%5D'] = encodeURIComponent('<10');
-        } else if (options.kudos_count === 'zero') {
-            queryAttrs['work_search%5Bkudos_count%5D'] = encodeURIComponent('<1');
+        if (options.kudos_count) {
+            if (options.kudos_count === 'few') {
+                queryAttrs['work_search%5Bkudos_count%5D'] = encodeURIComponent('<10');
+            } else if (options.kudos_count === 'zero') {
+                queryAttrs['work_search%5Bkudos_count%5D'] = encodeURIComponent('<1');
+            }
         }
-    }
 
-    if (options.word_count) {
-        if (options.word_count === 'less') {
-            queryAttrs['work_search%5Bword_count%5D'] = encodeURIComponent('<100');
-        } else if (options.word_count === 'more') {
-            queryAttrs['work_search%5Bword_count%5D'] = encodeURIComponent('>100');
+        if (options.word_count) {
+            if (options.word_count === 'less') {
+                queryAttrs['work_search%5Bword_count%5D'] = encodeURIComponent('<100');
+            } else if (options.word_count === 'more') {
+                queryAttrs['work_search%5Bword_count%5D'] = encodeURIComponent('>100');
+            }
         }
+
+        if (options.rating) {
+            queryAttrs['work_search%5Brating_ids%5D'] = options.rating;
+        }
+
+        if (options.query) {
+            queryAttrs['work_search%5Bquery%5D'] = encodeURIComponent(options.query);
+        }
+
+        await randomWorkFinder(token, queryAttrs, userId);
+    } catch (error) {
+        console.log(error)
     }
 
-    if (options.rating) {
-        queryAttrs['work_search%5Brating_ids%5D'] = options.rating;
-    }
-
-    if (options.query) {
-        queryAttrs['work_search%5Bquery%5D'] = encodeURIComponent(options.query);
-    }
-
-    await makeWorkDiscord(token, userId, queryAttrs);
     res.sendStatus(200)
 })
 
