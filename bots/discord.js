@@ -4,8 +4,8 @@ const fetch = require('@vercel/fetch')(require('cross-fetch'));
 const { InteractionType, InteractionResponseType, verifyKey, InteractionResponseFlags } = require('discord-interactions');
 const HTMLParser = require('node-html-parser');
 
-const { ao3Url, fkTagCollections } = require('../config/constants');
-const { makeWorkDiscord, collectionFinderFunc, workParserFinder, makeEmbed } = require('../functions/main');
+const { ao3Url, fkTagCollections, fkTagYears, winterFkTag, fkTag } = require('../config/constants');
+const { collectionFinderFunc, workParserFinder, makeEmbed } = require('../functions/main');
 const { getWorkData, getRandomParagraph, getWorkImages, discordWebhookResponse, makeWorksUrl, searchWorkPage, getWorkAllData } = require('../functions/func');
 const { makeQueryString, loadPage } = require('../functions/helpers');
 
@@ -65,7 +65,7 @@ router.post('/random/:messageId/:timestamp', async (_req, res) => {
     const message = _req.body;
     const { token } = message;
     const userId = message.guild_id ? message.member.user.id : message.user.id;
-    
+
     try {
         const options = {};
         (message.data.options || []).forEach(element => {
@@ -103,6 +103,16 @@ router.post('/random/:messageId/:timestamp', async (_req, res) => {
 
         if (options.query) {
             queryAttrs['work_search%5Bquery%5D'] = encodeURIComponent(options.query);
+        }
+
+        if (options.season) {
+            global.additionalTag = fkTagYears[options.season];
+
+            if (options.season.indexOf('w') === 0) {
+                global.seasonTag = winterFkTag;
+            } else {
+                global.seasonTag = fkTag;
+            }
         }
 
         await randomWorkFinder(token, queryAttrs, userId);

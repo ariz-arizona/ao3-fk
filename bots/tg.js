@@ -2,7 +2,6 @@ const router = require('express').Router();
 
 const TelegramBot = require('node-telegram-bot-api');
 
-const { fkTagYears, winterFkTag } = require('../config/constants');
 const { set, cit, pic, collection, onCallbackQuery } = require('../functions/main');
 const { showError } = require('../functions/func');
 
@@ -12,9 +11,6 @@ const bot = new TelegramBot(TG_TOKEN);
 bot.setWebHook(`${CURRENT_HOST}/tg${TG_TOKEN.replace(':', '_')}`, { allowed_updates: ["message", "edited_message", "callback_query", "inline_query"] });
 
 global.bot = bot;
-
-global.additionalTag = fkTagYears['w2022'];
-global.seasonTag = winterFkTag;
 
 bot.on('error', (error) => {
     console.log(error.code);
