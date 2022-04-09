@@ -90,10 +90,14 @@ router.post('/random/:messageId/:timestamp', async (_req, res) => {
         }
 
         if (options.word_count) {
-            if (options.word_count === 'less') {
+            if (options.word_count === 'art') {
                 queryAttrs['work_search%5Bword_count%5D'] = encodeURIComponent('<100');
-            } else if (options.word_count === 'more') {
-                queryAttrs['work_search%5Bword_count%5D'] = encodeURIComponent('>100');
+            } else if (options.word_count === 'mibl') {
+                queryAttrs['work_search%5Bword_count%5D'] = encodeURIComponent('101-4000');
+            } else if (options.word_count === 'midi') {
+                queryAttrs['work_search%5Bword_count%5D'] = encodeURIComponent('4001-15000');
+            } else if (options.word_count === 'maxi') {
+                queryAttrs['work_search%5Bword_count%5D'] = encodeURIComponent('>15001');
             }
         }
 
