@@ -15,7 +15,6 @@ const randomWorkFinder = async (token, queryAttrs, userId) => {
     await discordWebhookResponse('PATCH', token, {
         content: `Начинаю искать случайную работу по тегам ${[global.additionalTag, global.seasonTag].join(', ')}`
     });
-
     const { dom, randomWorkUrl } = await searchWorkPage(makeWorksUrl(global.seasonTag), queryAttrs);
 
     await discordWebhookResponse('PATCH', token, {
@@ -117,8 +116,11 @@ router.post('/random/:messageId/:timestamp', async (_req, res) => {
             } else {
                 global.seasonTag = fkTag;
             }
+        } else {
+            global.seasonTag = fkTag;
+            global.additionalTag = fkTagYears[2022];
         }
-
+        // console.log(global);
         await randomWorkFinder(token, queryAttrs, userId);
     } catch (error) {
         console.log(error)

@@ -28,6 +28,7 @@ const loadPage = async (url) => {
     if (!url) {
         return false
     }
+    // console.log(url);
     try {
         const res = await fetch(url);
         if (res.status >= 400) {

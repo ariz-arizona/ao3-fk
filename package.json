@@ -5,8 +5,9 @@
   "main": "index.js",
   "scripts": {
     "ngrok": "ngrok http 8443",
-    "start": "DEBUG='*' node index.js",
-    "test": "jest"
+    "start_debug": "DEBUG='*' node index.js",
+    "start": "node index.js",
+    "test": "DEBUG='*' jest"
   },
   "author": "",
   "license": "ISC",
