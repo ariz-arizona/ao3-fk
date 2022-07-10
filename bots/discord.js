@@ -118,9 +118,13 @@ router.post('/random/:messageId/:timestamp', async (_req, res) => {
             }
         } else {
             global.seasonTag = fkTag;
-            global.additionalTag = fkTagYears[2022];
+            global.additionalTag = fkTagYears['2022'];
         }
-        // console.log(global);
+
+        if (global.additionalTag) {
+            queryAttrs['work_search%5Bother_tag_names%5D'] = global.additionalTag;
+        }
+        // console.log({ options, global });
         await randomWorkFinder(token, queryAttrs, userId);
     } catch (error) {
         console.log(error)
