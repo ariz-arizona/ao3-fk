@@ -28,6 +28,7 @@ const set = async () => {
                         { text: 'Winter 2021', callback_data: 'set_w2021_w' },
                     ],
                     [
+                        { text: '2022', callback_data: 'set_2022' },
                         { text: 'Winter 2022', callback_data: 'set_w2022_w' },
                     ],
                     [

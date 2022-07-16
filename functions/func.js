@@ -59,7 +59,7 @@ const getWorkData = async (dom) => {
     const downloadLink = dom.querySelector('.download > ul > li:nth-child(2) > a') ? dom.querySelector('.download > ul > li:nth-child(2) > a').getAttribute('href') : null;
     const summary = dom.querySelector('.summary .userstuff') ? dom.querySelector('.summary .userstuff').textContent.trim() : '';
 
-    const ratingRaw = dom.querySelector('dd.rating.tags').textContent.trim();
+    const ratingRaw = dom.querySelector('dd.rating.tags') ? dom.querySelector('dd.rating.tags').textContent.trim() : 'Теги не найдены';
     const rating = Object.keys(ratingTags).find(key => ratingTags[key] === ratingRaw);
 
     const author = [];
