@@ -408,7 +408,7 @@ const makeWorkDiscord = async (token, userId, queryAttrs = {}) => {
     }
 }
 
-const makeEmbed = (title, fandom, randomWorkUrl, randomParagraphText, resume, summary, images, otherLinks, author, tags, rating) => {
+const makeEmbed = (title, fandom, randomWorkUrl, randomParagraphText, resume, summary, images, otherLinks, author, tags = [], rating) => {
     const url = randomWorkUrl.indexOf('http') === 0 ? randomWorkUrl : `${ao3Url}${randomWorkUrl}`;
     const embed = {
         type: 'rich',
