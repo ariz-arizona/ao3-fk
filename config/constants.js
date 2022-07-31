@@ -3,14 +3,16 @@ const winterFkTag = 'WTF%20%7C%20Winter%20Temporary%20Fandom%20Kombat';
 const ao3Url = 'https://archiveofourown.org';
 
 const fkTagYears = {
-    w2020: 'WTF%20%7C%20Winter%20Temporary%20Fandom%20Kombat%202022',
+    w2020: 'WTF%20%7C%20Winter%20Temporary%20Fandom%20Kombat%202020',
     2020: 'Fandom%20Kombat%202020',
     w2021: 'WTF%20%7C%20Winter%20Temporary%20Fandom%20Kombat%202021',
     2021: 'Fandom%20Kombat%202021',
-    w2022: 'WTF%20%7C%20Winter%20Temporary%20Fandom%20Kombat%202022'
+    w2022: 'WTF%20%7C%20Winter%20Temporary%20Fandom%20Kombat%202022',
+    2022: 'Fandom%20Kombat%202022'
 }
 
 const fkTagCollections = {
+    2022: 'FandomKombat2022',
     2021: 'FandomKombat2021',
     2020: 'FandomKombat2020',
     w2021: 'WTFKombat2021',

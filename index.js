@@ -1,7 +1,7 @@
 require('dotenv').config({ path: './env/test.env' })
 const express = require('express');
 
-const { fkTagYears, winterFkTag } = require('./config/constants');
+const { fkTagYears, winterFkTag, fkTag } = require('./config/constants');
 
 //todo port в переменные среды
 const { CURRENT_HOST, APP_PORT = 8443 } = process.env;
@@ -25,5 +25,5 @@ app.listen(APP_PORT, () => {
     console.log(`listening on ${APP_PORT}`)
 });
 
-global.additionalTag = fkTagYears['w2022'];
-global.seasonTag = winterFkTag;
+global.additionalTag = fkTagYears['2022'];
+global.seasonTag = fkTag;

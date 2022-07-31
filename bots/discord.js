@@ -11,11 +11,16 @@ const { makeQueryString, loadPage } = require('../functions/helpers');
 
 const { DISCORD_APPLICATION_ID } = process.env;
 
+const defKombat = {
+    season: fkTag,
+    additional: fkTagYears['2022'],
+    collection: fkTagCollections['2022']
+}
+
 const randomWorkFinder = async (token, queryAttrs, userId) => {
     await discordWebhookResponse('PATCH', token, {
         content: `Начинаю искать случайную работу по тегам ${[global.additionalTag, global.seasonTag].join(', ')}`
     });
-
     const { dom, randomWorkUrl } = await searchWorkPage(makeWorksUrl(global.seasonTag), queryAttrs);
 
     await discordWebhookResponse('PATCH', token, {
@@ -117,8 +122,15 @@ router.post('/random/:messageId/:timestamp', async (_req, res) => {
             } else {
                 global.seasonTag = fkTag;
             }
+        } else {
+            global.seasonTag = defKombat.season;
+            global.additionalTag = defKombat.additional;
         }
 
+        if (global.additionalTag) {
+            queryAttrs['work_search%5Bother_tag_names%5D'] = global.additionalTag;
+        }
+        // console.log({ options, global });
         await randomWorkFinder(token, queryAttrs, userId);
     } catch (error) {
         console.log(error)
@@ -141,12 +153,12 @@ router.post('/collection/:messageId/:timestamp', async (_req, res) => {
 
     // console.log({ type: "api_collection", id: message.id, token })
 
-    const collections = await collectionFinderFunc(fkTagCollections['w2022']);
+    const collections = await collectionFinderFunc(defKombat.collection);
     await fetch(`https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${token}/messages/@original`, {
         headers: { 'Content-Type': 'application/json' },
         method: "PATCH",
         body: JSON.stringify({
-            content: `Начинаю искать коллекцию в ${fkTagCollections['w2022']}`,
+            content: `Начинаю искать коллекцию в ${defKombat.collection}`,
             components: [
                 {
                     type: 1,
