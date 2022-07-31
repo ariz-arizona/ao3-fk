@@ -194,6 +194,7 @@ const getWorkAllData = async (dom) => {
     dom
   );
   const randomParagraphText = getRandomParagraph(dom).slice(0, 900);
+  const resume = getResume(dom);
   const { media, otherLinks } = getWorkImages(dom);
   const images = [];
   media.map((el) => {
@@ -206,6 +207,7 @@ const getWorkAllData = async (dom) => {
     title,
     fandom,
     randomParagraphText,
+    resume,
     summary,
     images,
     otherLinks,

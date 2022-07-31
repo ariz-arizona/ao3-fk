@@ -438,6 +438,11 @@ const makeEmbed = (title, fandom, randomWorkUrl, randomParagraphText, summary, i
         value: randomParagraphText
     });
 
+    if (resume) embed.fields.push({
+        name: 'Резюме (каждое 10 слово, не больше 100 слов)',
+        value: resume
+    });
+
     if (tags && tags.length) embed.fields.push({
         name: 'Тэги',
         value: tags.join(', ').slice(0, 1000)

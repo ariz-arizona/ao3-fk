@@ -27,9 +27,9 @@ const randomWorkFinder = async (token, queryAttrs, userId) => {
         content: `Нашел работу ${randomWorkUrl}`
     });
 
-    const { title, fandom, randomParagraphText, summary, images, otherLinks, author, tags, rating } = await getWorkAllData(dom);
+    const { title, fandom, randomParagraphText, resume, summary, images, otherLinks, author, tags, rating } = await getWorkAllData(dom);
 
-    const embed = makeEmbed(title, fandom, randomWorkUrl, randomParagraphText, summary, images, otherLinks, author, tags, rating);
+    const embed = makeEmbed(title, fandom, randomWorkUrl, randomParagraphText, resume, summary, images, otherLinks, author, tags, rating);
 
     await discordWebhookResponse('POST', token, {
         content: userId ? `<@${userId}> спрашивал, и я нашел ответ:` : '',
