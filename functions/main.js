@@ -4,7 +4,7 @@ const HTMLParser = require('node-html-parser');
 const fetch = require('@vercel/fetch')(require('cross-fetch'));
 
 const { getRandomInt, array_chunks, loadPage, makeQueryString } = require('./helpers');
-const { searchWorkPage, getWorkData, makeWorkAnswer, makeWorksUrl, getWorkImages, getRandomParagraph, techMsg, errorMessage } = require('./func');
+const { searchWorkPage, getWorkData, makeWorkAnswer, makeWorksUrl, getWorkImages, getRandomParagraph, techMsg, errorMessage, getResume } = require('./func');
 const { fkTagYears, fkTag, winterFkTag, ao3Url, fkTagCollections, ratingTags, ratingColors } = require('../config/constants');
 
 const { DISCORD_APPLICATION_ID } = process.env;
@@ -88,6 +88,15 @@ const cit = async () => {
             return bot.sendMessage(
                 chatId,
                 `<b>Случайный параграф</b>\n${randomParagraphText}`,
+                {
+                    parse_mode: 'HTML',
+                }
+            );
+        }).then(() => {
+            const resume = getResume(dom);
+            return bot.sendMessage(
+                chatId,
+                `<b>Резюме</b>\n${resume}`,
                 {
                     parse_mode: 'HTML',
                 }
@@ -325,6 +334,7 @@ const onCallbackQuery = async (callbackQuery) => {
     const msg = callbackQuery.message;
     const chatId = msg.chat.id;
     // message_id: msg.message_id,
+    console.log(`Получена команда ${action} от чат айди ${chatId}`);
 
     if (action.indexOf('set_') === 0) {
         const vars = action.replace('set_', '').split('_');
