@@ -443,7 +443,7 @@ const makeEmbed = (title, fandom, randomWorkUrl, randomParagraphText, resume, su
         value: resume
     });
 
-    if (tags && tags.length) embed.fields.push({
+    if (tags && tags.length && typeof tags === 'object') embed.fields.push({
         name: 'Тэги',
         value: tags.join(', ').slice(0, 1000)
     });
