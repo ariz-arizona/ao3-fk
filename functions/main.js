@@ -562,6 +562,7 @@ const makeWorkFunction = async (worksUrl, queryAttrs, token, userId) => {
     dom
   );
   const randomParagraphText = getRandomParagraph(dom).slice(0, 900);
+  const resume = getResume(dom);
   const { media, otherLinks } = getWorkImages(dom);
   const images = [];
   media.map((el) => {
@@ -575,6 +576,7 @@ const makeWorkFunction = async (worksUrl, queryAttrs, token, userId) => {
     fandom,
     randomWorkUrl,
     randomParagraphText,
+    resume,
     summary,
     images,
     otherLinks,
