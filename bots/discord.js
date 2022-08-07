@@ -210,133 +210,149 @@ router.post("/random/:messageId/:timestamp", async (_req, res) => {
 const collectionToken = {};
 
 router.post("/collection/:messageId/:timestamp", async (_req, res) => {
-  if (!_req.body.application_id) {
-    return;
-  }
-  const message = _req.body;
-  const { messageId } = _req.params;
-  const { token } = message;
-
-  collectionToken[messageId] = token;
-
-  // console.log({ type: "api_collection", id: message.id, token })
-
-  const collections = await collectionFinderFunc(defKombat.collection);
-  await fetch(
-    `https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${token}/messages/@original`,
-    {
-      headers: { "Content-Type": "application/json" },
-      method: "PATCH",
-      body: JSON.stringify({
-        content: `Начинаю искать коллекцию в ${defKombat.collection}`,
-        components: [
-          {
-            type: 1,
-            components: [
-              {
-                type: 3,
-                custom_id: "collection_select",
-                options: collections.map((el) => {
-                  return {
-                    label: el.name,
-                    value: el.href,
-                    token,
-                  };
-                }),
-                placeholder: "Choose collection",
-                min_values: 1,
-                max_values: 1,
-              },
-            ],
-          },
-        ],
-      }),
+  try {
+    if (!_req.body.application_id) {
+      return;
     }
-  );
+    const message = _req.body;
+    const { messageId } = _req.params;
+    const { token } = message;
+
+    collectionToken[messageId] = token;
+
+    // console.log({ type: "api_collection", id: message.id, token })
+
+    const collections = await collectionFinderFunc(defKombat.collection);
+    await fetch(
+      `https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${token}/messages/@original`,
+      {
+        headers: { "Content-Type": "application/json" },
+        method: "PATCH",
+        body: JSON.stringify({
+          content: `Начинаю искать коллекцию в ${defKombat.collection}`,
+          components: [
+            {
+              type: 1,
+              components: [
+                {
+                  type: 3,
+                  custom_id: "collection_select",
+                  options: collections.map((el) => {
+                    return {
+                      label: el.name,
+                      value: el.href,
+                      token,
+                    };
+                  }),
+                  placeholder: "Choose collection",
+                  min_values: 1,
+                  max_values: 1,
+                },
+              ],
+            },
+          ],
+        }),
+      }
+    );
+  } catch (error) {
+    console.log(error);
+    const msg = errorMessage(error);
+    await discordWebhookResponse("POST", token, {
+      content: `Ошибка: ${msg}`,
+    });
+  }
 
   res.sendStatus(200);
 });
 
 router.post("/collection_select/:messageId", async (_req, res) => {
-  const message = _req.body;
-  const { messageId } = _req.params;
-  const token = collectionToken[messageId] || message.token;
-  delete collectionToken[messageId];
+  try {
+    const message = _req.body;
+    const { messageId } = _req.params;
+    const token = collectionToken[messageId] || message.token;
+    delete collectionToken[messageId];
 
-  const userId = message.guild_id ? message.member.user.id : message.user.id;
+    const userId = message.guild_id ? message.member.user.id : message.user.id;
 
-  const url = `${ao3Url}${message.data.values[0]}`;
-  const { dom, href } = await workParserFinder(url);
-  const { fandom, title, summary, author, tags, rating } = await getWorkData(
-    dom
-  );
+    const url = `${ao3Url}${message.data.values[0]}`;
+    const { dom, href } = await workParserFinder(url);
+    const { fandom, title, summary, author, tags, rating } = await getWorkData(
+      dom
+    );
 
-  const randomParagraphText = getRandomParagraph(dom).slice(0, 900);
-  const resume = getResume(dom);
-  const { media, otherLinks } = getWorkImages(dom);
-  const images = [];
-  media.map((el) => {
-    el.map((img) => {
-      images.push(img.media);
+    const randomParagraphText = getRandomParagraph(dom).slice(0, 900);
+    const resume = getResume(dom);
+    const { media, otherLinks } = getWorkImages(dom);
+    const images = [];
+    media.map((el) => {
+      el.map((img) => {
+        images.push(img.media);
+      });
     });
-  });
 
-  const embed = makeEmbed(
-    title,
-    fandom,
-    href,
-    randomParagraphText,
-    resume,
-    summary,
-    images,
-    otherLinks,
-    author,
-    tags,
-    rating
-  );
+    const embed = makeEmbed(
+      title,
+      fandom,
+      href,
+      randomParagraphText,
+      resume,
+      summary,
+      images,
+      otherLinks,
+      author,
+      tags,
+      rating
+    );
 
-  await fetch(
-    `https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${token}/messages/@original`,
-    {
-      headers: { "Content-Type": "application/json" },
-      method: "PATCH",
-      body: JSON.stringify({
-        content: `Нашел работу ${href}`,
-        components: [
-          {
-            type: 1,
-            components: [
-              {
-                type: 3,
-                custom_id: "collection_select",
-                options: [
-                  {
-                    default: true,
-                    label: message.data.values[0],
-                    value: message.data.values[0],
-                  },
-                ],
-                placeholder: "Choose collection",
-                disabled: true,
-              },
-            ],
-          },
-        ],
-      }),
-    }
-  );
+    await fetch(
+      `https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${token}/messages/@original`,
+      {
+        headers: { "Content-Type": "application/json" },
+        method: "PATCH",
+        body: JSON.stringify({
+          content: `Нашел работу ${href}`,
+          components: [
+            {
+              type: 1,
+              components: [
+                {
+                  type: 3,
+                  custom_id: "collection_select",
+                  options: [
+                    {
+                      default: true,
+                      label: message.data.values[0],
+                      value: message.data.values[0],
+                    },
+                  ],
+                  placeholder: "Choose collection",
+                  disabled: true,
+                },
+              ],
+            },
+          ],
+        }),
+      }
+    );
 
-  const response = await fetch(
-    `https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${token}`,
-    {
-      headers: { "Content-Type": "application/json" },
-      method: "post",
-      body: JSON.stringify({
-        content: userId ? `<@${userId}> спрашивал, и я нашел ответ:` : "",
-        embeds: [embed],
-      }),
-    }
-  );
+    await fetch(
+      `https://discord.com/api/v8/webhooks/${DISCORD_APPLICATION_ID}/${token}`,
+      {
+        headers: { "Content-Type": "application/json" },
+        method: "post",
+        body: JSON.stringify({
+          content: userId ? `<@${userId}> спрашивал, и я нашел ответ:` : "",
+          embeds: [embed],
+        }),
+      }
+    );
+  } catch (error) {
+    console.log(error);
+    const msg = errorMessage(error);
+    await discordWebhookResponse("POST", token, {
+      content: `Ошибка: ${msg}`,
+    });
+  }
 
   res.sendStatus(200);
 });
