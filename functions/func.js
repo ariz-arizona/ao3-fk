@@ -222,6 +222,7 @@ const errorMessage = (error) => {
   switch (error.message) {
     case "notfound":
       msg = "Я ничего не нашел :(";
+      break;
     default:
       msg = "Ой! Что-то случилось! Может, попробуете еще раз?";
   }

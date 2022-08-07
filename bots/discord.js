@@ -30,6 +30,7 @@ const {
   searchWorkPage,
   getWorkAllData,
   getResume,
+  errorMessage,
 } = require("../functions/func");
 const { makeQueryString, loadPage } = require("../functions/helpers");
 const { response } = require("express");
@@ -111,6 +112,10 @@ router.post("/nude_random/:messageId/:timestamp", async (_req, res) => {
     await randomWorkFinder(token, queryAttrs, userId);
   } catch (error) {
     console.log(error);
+    const msg = errorMessage(error);
+    await discordWebhookResponse("POST", token, {
+      content: `Ошибка: ${msg}`,
+    });
   }
 
   res.sendStatus(200);
@@ -193,6 +198,10 @@ router.post("/random/:messageId/:timestamp", async (_req, res) => {
     await randomWorkFinder(token, queryAttrs, userId);
   } catch (error) {
     console.log(error);
+    const msg = errorMessage(error);
+    await discordWebhookResponse("POST", token, {
+      content: `Ошибка: ${msg}`,
+    });
   }
 
   res.sendStatus(200);
@@ -255,8 +264,6 @@ router.post("/collection_select/:messageId", async (_req, res) => {
   delete collectionToken[messageId];
 
   const userId = message.guild_id ? message.member.user.id : message.user.id;
-
-  // console.log({ type: "api_collection_select", id: message.id, token })
 
   const url = `${ao3Url}${message.data.values[0]}`;
   const { dom, href } = await workParserFinder(url);
