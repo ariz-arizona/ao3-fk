@@ -8,7 +8,8 @@ const fkTagYears = {
     w2021: 'WTF%20%7C%20Winter%20Temporary%20Fandom%20Kombat%202021',
     2021: 'Fandom%20Kombat%202021',
     w2022: 'WTF%20%7C%20Winter%20Temporary%20Fandom%20Kombat%202022',
-    2022: 'Fandom%20Kombat%202022'
+    2022: 'Fandom%20Kombat%202022',
+    w2023: 'WTF%20%7C%20Winter%20Temporary%20Fandom%20Kombat%202023',
 }
 
 const fkTagCollections = {
@@ -16,7 +17,8 @@ const fkTagCollections = {
     2021: 'FandomKombat2021',
     2020: 'FandomKombat2020',
     w2021: 'WTFKombat2021',
-    w2022: 'WTFKombat2022'
+    w2022: 'WTFKombat2022',
+    w2023: 'WTFKombat2023',
 }
 
 const worksUrl = `${ao3Url}/tags/${fkTag}/works`;

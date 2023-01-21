@@ -111,12 +111,6 @@ const cit = async () => {
         }
       );
     })
-    .then(() => {
-      const resume = getResume(dom);
-      return bot.sendMessage(chatId, `<b>Резюме</b>\n${resume}`, {
-        parse_mode: "HTML",
-      });
-    });
 
   return true;
 };
@@ -497,11 +491,11 @@ const makeEmbed = (
       value: randomParagraphText,
     });
 
-  if (resume)
-    embed.fields.push({
-      name: "Резюме (каждое 10 слово, не больше 100 слов)",
-      value: resume,
-    });
+  // if (resume)
+  //   embed.fields.push({
+  //     name: "Резюме (каждое 10 слово, не больше 100 слов)",
+  //     value: resume,
+  //   });
 
   if (tags && tags.length && typeof tags === "object")
     embed.fields.push({
