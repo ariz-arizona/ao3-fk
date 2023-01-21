@@ -25,5 +25,5 @@ app.listen(APP_PORT, () => {
     console.log(`listening on ${APP_PORT}`)
 });
 
-global.additionalTag = fkTagYears['2023'];
+global.additionalTag = fkTagYears['w2023'];
 global.seasonTag = winterFkTag;
