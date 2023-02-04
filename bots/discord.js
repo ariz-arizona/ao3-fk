@@ -39,8 +39,8 @@ const { DISCORD_APPLICATION_ID } = process.env;
 
 const defKombat = {
   season: fkTag,
-  additional: fkTagYears["2022"],
-  collection: fkTagCollections["2022"],
+  additional: fkTagYears["w2023"],
+  collection: fkTagCollections["w2023"],
 };
 
 const randomWorkFinder = async (token, queryAttrs, userId) => {
